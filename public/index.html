@@ -1,0 +1,3936 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="build-time" content="2026-09-13T21:30:00">
+    <title>11的娱乐游戏网站</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Microsoft YaHei', Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            color: #fff;
+        }
+
+        .header {
+            background: linear-gradient(90deg, #2d132c 0%, #801336 50%, #c72c41 100%);
+            padding: 20px 40px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        .nav {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .nav-btn {
+            padding: 12px 24px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid #ffd700;
+            color: #ffd700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .nav-btn:hover, .nav-btn.active {
+            background: #ffd700;
+            color: #2d132c;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .admin-only {
+            display: none;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-badge {
+            background: rgba(255, 215, 0, 0.2);
+            padding: 8px 16px;
+            border-radius: 20px;
+            border: 1px solid #ffd700;
+        }
+
+        .user-badge.admin {
+            background: rgba(255, 0, 0, 0.2);
+            border-color: #ff4444;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 30px auto;
+            padding: 0 20px;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+
+        .card-title {
+            font-size: 24px;
+            color: #ffd700;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .stat-icon {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-size: 36px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s;
+            margin-right: 10px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(90deg, #ffd700 0%, #ffed4e 100%);
+            color: #2d132c;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 215, 0, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(90deg, #c72c41 0%, #ee4545 100%);
+            color: #fff;
+        }
+
+        .btn-danger:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(199, 44, 65, 0.4);
+        }
+
+        .btn-warning {
+            background: linear-gradient(90deg, #e67e22, #f39c12);
+            color: #fff;
+        }
+
+        .btn-warning:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(230, 126, 34, 0.4);
+        }
+
+        .btn-success {
+            background: linear-gradient(90deg, #28a745 0%, #34ce57 100%);
+            color: #fff;
+        }
+
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        table th, table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        table th {
+            background: rgba(255, 215, 0, 0.1);
+            color: #ffd700;
+            font-weight: bold;
+        }
+
+        table tr:hover {
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        table input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid rgba(255, 215, 0, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #fff;
+        }
+
+        .item-card {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .item-card:hover {
+            background: rgba(255, 215, 0, 0.05);
+            border-color: rgba(255, 215, 0, 0.4);
+        }
+
+        .item-info {
+            flex: 1;
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .item-desc {
+            color: #aaa;
+            font-size: 0.9em;
+        }
+
+        .item-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .chip-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            margin-bottom: 10px;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+        }
+
+        .chip-color {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px solid #fff;
+            margin-right: 15px;
+        }
+
+        .chip-info {
+            flex: 1;
+        }
+
+        .chip-name {
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 5px;
+        }
+
+        .chip-value {
+            font-size: 14px;
+            color: #aaa;
+        }
+
+        .chip-quantity {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .chip-quantity input {
+            width: 100px;
+            padding: 8px;
+            text-align: center;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.3);
+            color: #ffd700;
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            transition: all 0.3s;
+        }
+
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            background: rgba(0, 0, 0, 0.3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .product-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .product-details {
+            padding: 15px;
+        }
+
+        .product-name {
+            font-size: 18px;
+            font-weight: bold;
+            color: #ffd700;
+            margin-bottom: 10px;
+        }
+
+        .product-price {
+            font-size: 24px;
+            color: #ff6b6b;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .product-actions .btn {
+            flex: 1;
+            padding: 8px;
+            font-size: 14px;
+        }
+
+        .game-placeholder {
+            text-align: center;
+            padding: 100px 20px;
+        }
+
+        .game-placeholder .icon {
+            font-size: 100px;
+            margin-bottom: 20px;
+        }
+
+        .game-placeholder h2 {
+            font-size: 36px;
+            color: #ffd700;
+            margin-bottom: 20px;
+        }
+
+        .game-placeholder p {
+            font-size: 18px;
+            color: #aaa;
+            margin-bottom: 30px;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            border-radius: 15px;
+            padding: 30px;
+            max-width: 600px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            border: 2px solid #ffd700;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(255, 215, 0, 0.3);
+        }
+
+        .modal-header h3 {
+            color: #ffd700;
+            font-size: 24px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 28px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .close-btn:hover {
+            color: #c72c41;
+            transform: rotate(90deg);
+        }
+
+        .image-upload-area {
+            border: 2px dashed rgba(255, 215, 0, 0.5);
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 20px;
+        }
+
+        .image-upload-area:hover {
+            border-color: #ffd700;
+            background: rgba(255, 215, 0, 0.05);
+        }
+
+        /* 开关样式 */
+        #bankToggle:checked + #bankToggleSlider {
+            background-color: #28a745;
+        }
+        #bankToggle:checked + #bankToggleSlider::before {
+            transform: translateX(26px);
+        }
+        #bankToggleSlider::before {
+            content: "";
+            position: absolute;
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.3s;
+            border-radius: 50%;
+        }
+        #bank .bank-disabled .loan-section {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .image-upload-area img {
+            max-width: 100%;
+            max-height: 200px;
+            border-radius: 8px;
+        }
+
+        .total-bar {
+            background: linear-gradient(90deg, #2d132c 0%, #801336 100%);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 2px solid #ffd700;
+        }
+
+        .total-bar .total-label {
+            font-size: 20px;
+            color: #ffd700;
+        }
+
+        .total-bar .total-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .save-status {
+            color: #28a745;
+            line-height: 44px;
+            display: none;
+            animation: fadeInOut 2s ease-in-out;
+        }
+
+        .save-status.show {
+            display: inline-block;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translateY(-10px); }
+            20% { opacity: 1; transform: translateY(0); }
+            80% { opacity: 1; }
+            100% { opacity: 0; }
+        }
+
+        .auto-save-indicator {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(40, 167, 69, 0.9);
+            color: #fff;
+            padding: 10px 20px;
+            border-radius: 8px;
+            display: none;
+            animation: slideIn 0.3s ease-out;
+            z-index: 999;
+        }
+
+        .auto-save-indicator.show {
+            display: block;
+        }
+
+        @keyframes slideIn {
+            from { transform: translateX(100px); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .auth-container {
+            max-width: 500px;
+            margin: 100px auto;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 40px;
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .auth-container h2 {
+            color: #ffd700;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 32px;
+        }
+
+        .auth-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            color: #ffd700;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .auth-tab.active {
+            background: #ffd700;
+            color: #2d132c;
+        }
+
+        .auth-form {
+            display: none;
+        }
+
+        .auth-form.active {
+            display: block;
+        }
+
+        .error-message {
+            color: #ff4444;
+            text-align: center;
+            margin-top: 15px;
+            display: none;
+        }
+
+        .error-message.show {
+            display: block;
+        }
+
+        .player-card {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+            border: 2px solid rgba(255, 215, 0, 0.3);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .player-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .player-role {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .player-role.admin {
+            background: rgba(255, 0, 0, 0.2);
+            color: #ff4444;
+            border: 1px solid #ff4444;
+        }
+
+        .player-role.player {
+            background: rgba(40, 167, 69, 0.2);
+            color: #28a745;
+            border: 1px solid #28a745;
+        }
+
+        .player-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+
+        .player-stat {
+            text-align: center;
+        }
+
+        .player-stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #ffd700;
+        }
+
+        .player-stat-label {
+            font-size: 12px;
+            color: #aaa;
+            margin-top: 5px;
+        }
+
+        .purchase-item {
+            background: rgba(255, 255, 255, 0.05);
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            border-left: 3px solid #ffd700;
+        }
+
+        @media (max-width: 768px) {
+            .header {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .product-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="authSection">
+        <div class="auth-container">
+            <h2>11的娱乐游戏网站</h2>
+            <div class="auth-tabs">
+                <button class="auth-tab active" onclick="showAuthTab('login')">登录</button>
+                <button class="auth-tab" onclick="showAuthTab('register')">注册</button>
+            </div>
+            
+            <div id="loginForm" class="auth-form active">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="loginUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="loginPassword" placeholder="请输入密码">
+                </div>
+                <button id="btnLogin" class="btn btn-primary" style="width: 100%;" onclick="handleLogin()">登录</button>
+                <div id="loginError" class="error-message"></div>
+            </div>
+
+            <div id="registerForm" class="auth-form">
+                <div class="form-group">
+                    <label>用户名</label>
+                    <input type="text" id="registerUsername" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <input type="password" id="registerPassword" placeholder="请输入密码">
+                </div>
+                <div class="form-group">
+                    <label>确认密码</label>
+                    <input type="password" id="registerConfirmPassword" placeholder="请再次输入密码">
+                </div>
+                <button id="btnRegister" class="btn btn-success" style="width: 100%;" onclick="handleRegister()">注册</button>
+                <div id="registerError" class="error-message"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="mainSection" style="display: none;">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                <button class="nav-btn" onclick="showPage('home')">主页面</button>
+                <button class="nav-btn" onclick="showPage('assets')">我的资产</button>
+                <button class="nav-btn" onclick="showPage('shop')">商店</button>
+                <button class="nav-btn" onclick="showPage('bank')">银行</button>
+                <button class="nav-btn admin-only" onclick="showPage('admin')">管理后台</button>
+                <button class="nav-btn admin-only" onclick="showPage('users')">用户管理</button>
+                <button class="nav-btn" onclick="showPage('games')">游戏界面</button>
+            </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">余额: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+<!-- page:home will be loaded dynamically -->
+<!-- page:assets will be loaded dynamically -->
+<!-- page:shop will be loaded dynamically -->
+<!-- page:bank will be loaded dynamically -->
+<!-- page:admin will be loaded dynamically -->
+<!-- page:users will be loaded dynamically -->
+<!-- page:games will be loaded dynamically -->
+    </div>
+
+    <div class="modal" id="productModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">添加商品</h3>
+                <button class="close-btn" onclick="closeProductModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>商品名称</label>
+                <input type="text" id="productName" placeholder="请输入商品名称">
+            </div>
+            <div class="form-group">
+                <label>商品价格</label>
+                <input type="number" id="productPrice" placeholder="请输入商品价格">
+            </div>
+            <div class="form-group">
+                <label>商品描述</label>
+                <textarea id="productDesc" rows="3" placeholder="请输入商品描述"></textarea>
+            </div>
+            <div class="form-group">
+                <label>商品图片</label>
+                <div class="image-upload-area" id="imageUploadArea" onclick="document.getElementById('productImage').click()">
+                    <div id="uploadPlaceholder">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                        <div>点击上传图片</div>
+                    </div>
+                    <img id="imagePreview" style="display: none;">
+                </div>
+                <input type="file" id="productImage" accept="image/*" style="display: none;" onchange="handleImageUpload(event)">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveProduct" class="btn btn-primary" onclick="saveProduct()">保存</button>
+                <button class="btn btn-danger" onclick="closeProductModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="userBalanceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改用户余额</h3>
+                <button class="close-btn" onclick="closeUserBalanceModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="balanceUsername" readonly>
+            </div>
+            <div class="form-group">
+                <label>新余额</label>
+                <input type="number" id="newBalance" placeholder="请输入新余额">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnUpdateBalance" class="btn btn-primary" onclick="updateUserBalance()">保存</button>
+                <button class="btn btn-danger" onclick="closeUserBalanceModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="assetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="assetModalTitle">添加资产</h3>
+                <button class="close-btn" onclick="closeAssetModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>资产名称</label>
+                <input type="text" id="assetName" placeholder="请输入资产名称">
+            </div>
+            <div class="form-group">
+                <label>资产价值</label>
+                <input type="number" id="assetValue" placeholder="请输入资产价值">
+            </div>
+            <div class="form-group">
+                <label>资产描述</label>
+                <textarea id="assetDesc" rows="3" placeholder="请输入资产描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveAsset" class="btn btn-primary" onclick="saveAsset()">保存</button>
+                <button class="btn btn-danger" onclick="closeAssetModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="debtModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="debtModalTitle">添加欠款</h3>
+                <button class="close-btn" onclick="closeDebtModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>欠款名称</label>
+                <input type="text" id="debtName" placeholder="请输入欠款名称">
+            </div>
+            <div class="form-group">
+                <label>欠款金额</label>
+                <input type="number" id="debtAmount" placeholder="请输入欠款金额">
+            </div>
+            <div class="form-group">
+                <label>欠款描述</label>
+                <textarea id="debtDesc" rows="3" placeholder="请输入欠款描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveDebt" class="btn btn-primary" onclick="saveDebt()">保存</button>
+                <button class="btn btn-danger" onclick="closeDebtModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="itemModalTitle">添加物品</h3>
+                <button class="close-btn" onclick="closeItemModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>物品名称</label>
+                <input type="text" id="itemName" placeholder="请输入物品名称">
+            </div>
+            <div class="form-group">
+                <label>物品价值</label>
+                <input type="number" id="itemValue" placeholder="请输入物品价值">
+            </div>
+            <div class="form-group">
+                <label>物品描述</label>
+                <textarea id="itemDesc" rows="3" placeholder="请输入物品描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveItem" class="btn btn-primary" onclick="saveItem()">保存</button>
+                <button class="btn btn-danger" onclick="closeItemModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="rewardModalTitle">添加奖励</h3>
+                <button class="close-btn" onclick="closeRewardModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>奖励名称</label>
+                <input type="text" id="rewardName" placeholder="请输入奖励名称">
+            </div>
+            <div class="form-group">
+                <label>奖励价值</label>
+                <input type="number" id="rewardValue" placeholder="请输入奖励价值">
+            </div>
+            <div class="form-group">
+                <label>奖励描述</label>
+                <textarea id="rewardDesc" rows="3" placeholder="请输入奖励描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveReward" class="btn btn-success" onclick="saveReward()">保存</button>
+                <button class="btn btn-danger" onclick="closeRewardModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="penaltyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="penaltyModalTitle">添加惩罚</h3>
+                <button class="close-btn" onclick="closePenaltyModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>惩罚名称</label>
+                <input type="text" id="penaltyName" placeholder="请输入惩罚名称">
+            </div>
+            <div class="form-group">
+                <label>惩罚金额</label>
+                <input type="number" id="penaltyAmount" placeholder="请输入惩罚金额">
+            </div>
+            <div class="form-group">
+                <label>惩罚描述</label>
+                <textarea id="penaltyDesc" rows="3" placeholder="请输入惩罚描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSavePenalty" class="btn btn-danger" onclick="savePenalty()">保存</button>
+                <button class="btn btn-danger" onclick="closePenaltyModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="adminRewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="adminRewardModalTitle">添加奖励</h3>
+                <button class="close-btn" onclick="closeAdminRewardModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>奖励名称</label>
+                <input type="text" id="adminRewardName" placeholder="请输入奖励名称">
+            </div>
+            <div class="form-group">
+                <label>奖励价格</label>
+                <input type="number" id="adminRewardPrice" placeholder="请输入奖励价格">
+            </div>
+            <div class="form-group">
+                <label>奖励描述</label>
+                <textarea id="adminRewardDesc" rows="3" placeholder="请输入奖励描述"></textarea>
+            </div>
+            <div class="form-group">
+                <label>奖励图片</label>
+                <div class="image-upload-area" id="adminRewardImageArea" onclick="document.getElementById('adminRewardImage').click()">
+                    <div id="adminRewardUploadPlaceholder">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                        <div>点击上传图片</div>
+                    </div>
+                    <img id="adminRewardImagePreview" style="display: none;">
+                </div>
+                <input type="file" id="adminRewardImage" accept="image/*" style="display: none;" onchange="handleAdminRewardImageUpload(event)">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveAdminReward" class="btn btn-success" onclick="saveAdminReward()">保存</button>
+                <button class="btn btn-danger" onclick="closeAdminRewardModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="adminPenaltyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="adminPenaltyModalTitle">添加惩罚</h3>
+                <button class="close-btn" onclick="closeAdminPenaltyModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>惩罚名称</label>
+                <input type="text" id="adminPenaltyName" placeholder="请输入惩罚名称">
+            </div>
+            <div class="form-group">
+                <label>惩罚价格</label>
+                <input type="number" id="adminPenaltyPrice" placeholder="请输入消除该惩罚的价格">
+            </div>
+            <div class="form-group">
+                <label>惩罚描述</label>
+                <textarea id="adminPenaltyDesc" rows="3" placeholder="请输入惩罚描述"></textarea>
+            </div>
+            <div class="form-group">
+                <label>惩罚图片</label>
+                <div class="image-upload-area" id="adminPenaltyImageArea" onclick="document.getElementById('adminPenaltyImage').click()">
+                    <div id="adminPenaltyUploadPlaceholder">
+                        <div style="font-size: 48px; margin-bottom: 10px;">📷</div>
+                        <div>点击上传图片</div>
+                    </div>
+                    <img id="adminPenaltyImagePreview" style="display: none;">
+                </div>
+                <input type="file" id="adminPenaltyImage" accept="image/*" style="display: none;" onchange="handleAdminPenaltyImageUpload(event)">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveAdminPenalty" class="btn btn-danger" onclick="saveAdminPenalty()">保存</button>
+                <button class="btn btn-danger" onclick="closeAdminPenaltyModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+
+    <script>
+        const API_BASE = '/api'
+        
+        let currentUser = null
+        let products = []
+        let editingProductId = null
+        let currentImageData = null
+        let editingUserBalance = null
+        let items = []
+        let rewards = []
+        let debts = []
+        let penalties = []
+        let selectedUser = null
+        let editingItemId = null
+        let editingRewardId = null
+        let editingDebtId = null
+        let editingPenaltyId = null
+
+        function showAuthTab(tab) {
+            document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'))
+            document.querySelectorAll('.auth-form').forEach(f => f.classList.remove('active'))
+            
+            if (tab === 'login') {
+                document.querySelectorAll('.auth-tab')[0].classList.add('active')
+                document.getElementById('loginForm').classList.add('active')
+            } else {
+                document.querySelectorAll('.auth-tab')[1].classList.add('active')
+                document.getElementById('registerForm').classList.add('active')
+            }
+        }
+
+        async function handleLogin() {
+            const btn = document.getElementById('btnLogin')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const username = document.getElementById('loginUsername').value
+            const password = document.getElementById('loginPassword').value
+            const errorDiv = document.getElementById('loginError')
+
+            if (!username || !password) {
+                errorDiv.textContent = '用户名和密码不能为空'
+                errorDiv.classList.add('show')
+                unlockBtn(btn)
+                return
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                })
+
+                const data = await response.json()
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token)
+                    localStorage.setItem('user', JSON.stringify(data.user))
+                    currentUser = data.user
+                    showMainApp()
+                } else {
+                    errorDiv.textContent = data.error
+                    errorDiv.classList.add('show')
+                    unlockBtn(btn)
+                }
+            } catch (error) {
+                errorDiv.textContent = '登录失败，请检查网络连接'
+                errorDiv.classList.add('show')
+                unlockBtn(btn)
+            }
+        }
+
+        async function handleRegister() {
+            const btn = document.getElementById('btnRegister')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const username = document.getElementById('registerUsername').value
+            const password = document.getElementById('registerPassword').value
+            const confirmPassword = document.getElementById('registerConfirmPassword').value
+            const errorDiv = document.getElementById('registerError')
+
+            if (!username || !password) {
+                errorDiv.textContent = '用户名和密码不能为空'
+                errorDiv.classList.add('show')
+                unlockBtn(btn)
+                return
+            }
+
+            if (password !== confirmPassword) {
+                errorDiv.textContent = '两次输入的密码不一致'
+                errorDiv.classList.add('show')
+                unlockBtn(btn)
+                return
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/auth/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password, role: 'player' })
+                })
+
+                const data = await response.json()
+
+                if (data.success) {
+                    localStorage.setItem('token', data.token)
+                    localStorage.setItem('user', JSON.stringify(data.user))
+                    currentUser = data.user
+                    showMainApp()
+                } else {
+                    errorDiv.textContent = data.error
+                    errorDiv.classList.add('show')
+                    unlockBtn(btn)
+                }
+            } catch (error) {
+                errorDiv.textContent = '注册失败，请检查网络连接'
+                errorDiv.classList.add('show')
+                unlockBtn(btn)
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+            currentUser = null
+            document.getElementById('authSection').style.display = 'block'
+            document.getElementById('mainSection').style.display = 'none'
+        }
+
+
+        // Page HTML content
+        const PAGE_CONTENT = {
+            "home": `            <div id="home" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="userBalanceStat">¥0</div>
+                        <div class="stat-label">我的余额</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-value" id="totalGames">0</div>
+                        <div class="stat-label">游戏数量</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📢 公告栏</div>
+                    <div id="announcementBoard">
+                        <p style="color: #aaa; text-align: center; padding: 20px;">暂无公告</p>
+                    </div>
+                    <div id="adminAnnouncementSection" class="admin-only" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,215,0,0.2);">
+                        <h4 style="color: #ffd700; margin-bottom: 12px;">管理员发布公告</h4>
+                        <div class="form-group">
+                            <input type="text" id="announcementTitle" placeholder="公告标题">
+                        </div>
+                        <div class="form-group">
+                            <textarea id="announcementContent" rows="3" placeholder="公告内容（可选）"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="image-upload-area" id="announcementImageArea" onclick="document.getElementById('announcementImage').click()" style="padding: 12px; border: 2px dashed rgba(255,215,0,0.3); border-radius: 8px; text-align: center; cursor: pointer; color: #aaa;">
+                                <div id="announcementUploadPlaceholder">📷 点击上传公告图片（可选）</div>
+                                <img id="announcementImagePreview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 8px;">
+                            </div>
+                            <input type="file" id="announcementImage" accept="image/*" style="display: none;" onchange="handleAnnouncementImageUpload(event)">
+                        </div>
+                        <button id="btnPublishAnnouncement" class="btn btn-primary" onclick="publishAnnouncement()">发布公告</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💬 留言板</div>
+                    <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px;">
+                        <input type="text" id="messageInput" placeholder="说点什么..." style="flex: 1; padding: 12px; border: 2px solid rgba(255,215,0,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-size: 16px; min-width: 150px;">
+                        <div class="image-upload-btn" onclick="document.getElementById('messageImage').click()" style="padding: 12px 16px; border: 2px solid rgba(255,215,0,0.3); border-radius: 8px; cursor: pointer; color: #aaa; background: rgba(0,0,0,0.3); display: flex; align-items: center; gap: 4px;">
+                            📷
+                            <span id="messageImageName" style="font-size: 12px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                        </div>
+                        <input type="file" id="messageImage" accept="image/*" style="display: none;" onchange="handleMessageImageUpload(event)">
+                        <button id="btnSendMessage" class="btn btn-primary" onclick="sendMessage()">发送</button>
+                    </div>
+                    <div id="messageList">
+                        <p style="color: #aaa; text-align: center; padding: 20px;">暂无留言</p>
+                    </div>
+                </div>
+
+                </div>
+`,
+            "assets": `            <div id="assets" class="page">
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="assetsBalance">¥0</div>
+                        <div class="stat-label">余额</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-value" id="assetsDebts">0</div>
+                        <div class="stat-label">欠款数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎁</div>
+                        <div class="stat-value" id="assetsRewards">0</div>
+                        <div class="stat-label">奖励数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✖</div>
+                        <div class="stat-value" id="assetsPenalties">0</div>
+                        <div class="stat-label">惩罚数</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="card">
+                        <div class="card-title" style="color: #ff6b6b;">欠款</div>
+                        <div id="assetDebtsList">
+                            <p style="color: #aaa; text-align: center; padding: 20px;">暂无欠款</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="color: #28a745;">奖励</div>
+                        <div id="assetRewardsList">
+                            <p style="color: #aaa; text-align: center; padding: 20px;">暂无奖励</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="color: #ff4444;">惩罚</div>
+                        <div id="assetPenaltiesList">
+                            <p style="color: #aaa; text-align: center; padding: 20px;">暂无惩罚</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+`,
+            "shop": `            <div id="shop" class="page">
+                <div class="card">
+                    <div class="card-title">🎁 奖励兑换</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">使用余额兑换奖励</p>
+                    <div id="shopRewardsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">✖ 消除惩罚</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">使用余额消除惩罚</p>
+                    <div id="shopPenaltiesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🛒 商品购买</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">使用余额购买商品</p>
+                    <div id="shopProductsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+                </div>
+            </div>
+`,
+            "bank": `            <div id="bank" class="page">
+                <div id="bankStatusBanner" style="padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; display: none; font-weight: bold; text-align: center; font-size: 16px;"></div>
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="bankBalanceStat">¥0</div>
+                        <div class="stat-label">我的余额</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">📋</div>
+                        <div class="stat-value" id="bankTotalLoans">0</div>
+                        <div class="stat-label">贷款次数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">⚠️</div>
+                        <div class="stat-value" id="bankActiveLoans">0</div>
+                        <div class="stat-label">未还贷款</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-value" id="bankRemainingDebt">¥0</div>
+                        <div class="stat-label">剩余欠款</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏦 贷款信息</div>
+                    <div id="loanConfigDisplay" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; padding: 16px; background: #1a1a2e; border-radius: 8px;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📝 申请贷款</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 500px;">
+                        <div class="form-group">
+                            <label>贷款金额 (¥)</label>
+                            <input type="number" id="loanAmount" placeholder="输入金额" min="1">
+                        </div>
+                        <div class="form-group">
+                            <label>贷款期限 (天)</label>
+                            <input type="number" id="loanTermDays" placeholder="输入天数" min="1">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button id="btnApplyLoan" class="btn btn-primary" onclick="applyLoan()" style="width: 100%;">申请贷款</button>
+                            <div id="loanResult" style="margin-top: 8px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📋 我的贷款记录</div>
+                    <div id="myLoansList"></div>
+                </div>
+            </div>
+`,
+            "admin": `            <div id="admin" class="page">
+                <div class="card">
+                    <div class="card-title">奖励管理</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <p style="color: #aaa; margin: 0;">管理所有可兑换的奖励</p>
+                        <button class="btn btn-success" onclick="openAdminRewardModal()">添加奖励</button>
+                    </div>
+                    <div id="adminRewardsList"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">惩罚管理</div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <p style="color: #aaa; margin: 0;">管理所有可消除的惩罚</p>
+                        <button class="btn btn-danger" onclick="openAdminPenaltyModal()">添加惩罚</button>
+                    </div>
+                    <div id="adminPenaltiesList"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🏦 贷款配置管理</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">设置贷款上限、期限、利率等</p>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; max-width: 600px;">
+                        <div class="form-group">
+                            <label>贷款上限 (¥)</label>
+                            <input type="number" id="loanCfgMaxAmount" placeholder="如: 10000">
+                        </div>
+                        <div class="form-group">
+                            <label>最长期限 (天)</label>
+                            <input type="number" id="loanCfgMaxTerm" placeholder="如: 30">
+                        </div>
+                        <div class="form-group">
+                            <label>利率 (%)</label>
+                            <input type="number" id="loanCfgInterestRate" placeholder="如: 5" step="0.1">
+                        </div>
+                        <div class="form-group">
+                            <label>逾期日罚息率 (%)</label>
+                            <input type="number" id="loanCfgDailyPenalty" placeholder="如: 1" step="0.1">
+                        </div>
+                        <div style="grid-column: 1 / -1;">
+                            <button id="btnSaveLoanConfig" class="btn btn-primary" onclick="saveLoanConfig()">保存配置</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🔌 银行开关</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">控制银行系统是否对玩家开放</p>
+                    <div style="display: flex; align-items: center; gap: 16px;">
+                        <label style="position: relative; display: inline-block; width: 60px; height: 34px;">
+                            <input type="checkbox" id="bankToggle" onchange="toggleBankStatus()" style="opacity: 0; width: 0; height: 0;">
+                            <span id="bankToggleSlider" style="position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #555; transition: 0.3s; border-radius: 34px;"></span>
+                        </label>
+                        <span id="bankToggleStatus" style="font-size: 16px; font-weight: bold; color: #aaa;"></span>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📋 所有贷款记录</div>
+                    <div id="adminLoansList"></div>
+                </div>
+            </div>
+`,
+            "users": `            <div id="users" class="page">
+                <div class="card">
+                    <div class="card-title">用户管理</div>
+                    <div id="usersList"></div>
+                </div>
+
+                <div id="userDetailSection" style="display: none;">
+                    <div class="card">
+                        <div class="card-title">
+                            <span id="selectedUserName"></span> - 资产管理
+                            <button class="btn btn-danger" style="float: right; margin-top: -5px;" onclick="closeUserDetail()">返回列表</button>
+                        </div>
+                        
+                        <div class="player-stats" style="margin-bottom: 30px;">
+                            <div class="player-stat">
+                                <div class="player-stat-value" id="userBalanceDisplay">¥0</div>
+                                <div class="player-stat-label">余额</div>
+                            </div>
+                            <div class="player-stat" style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-primary" onclick="openUserBalanceModalForSelectedUser()">修改余额</button>
+                                <button class="btn btn-warning" onclick="resetUserPassword()">重置密码</button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #28a745; margin: 0;">奖励</h3>
+                                    <button class="btn btn-success" onclick="openRewardModal()">添加</button>
+                                </div>
+                                <div id="rewardsList"></div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #ff6b6b; margin: 0;">欠款</h3>
+                                    <button class="btn btn-primary" onclick="openDebtModalForSelectedUser()">添加</button>
+                                </div>
+                                <div id="debtsList"></div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #ff4444; margin: 0;">惩罚</h3>
+                                    <button class="btn btn-danger" onclick="openPenaltyModal()">添加</button>
+                                </div>
+                                <div id="penaltiesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+`,
+            "games": `            <div id="games" class="page">
+                <div class="game-placeholder">
+                    <div class="icon">🎲</div>
+                    <h2>游戏界面</h2>
+                    <p>游戏功能正在开发中，敬请期待...</p>
+                    <button class="btn btn-primary" onclick="showPage('home')">返回首页</button>
+                </div>
+            </div>
+        </div>
+`,
+        }
+        
+        async function checkAuth() {
+            const token = localStorage.getItem('token')
+            const user = localStorage.getItem('user')
+
+            if (token && user) {
+                try {
+                    const response = await fetch(`${API_BASE}/user/profile`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+
+                    if (response.ok) {
+                        const data = await response.json()
+                        currentUser = { ...JSON.parse(user), ...data }
+                        localStorage.setItem('user', JSON.stringify(currentUser))
+                        showMainApp()
+                        return
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error)
+                }
+            }
+
+            localStorage.removeItem('token')
+            localStorage.removeItem('user')
+        }
+
+        function showMainApp() {
+            document.getElementById('authSection').style.display = 'none'
+            document.getElementById('mainSection').style.display = 'block'
+            
+            document.getElementById('currentUsername').textContent = currentUser.username
+            document.getElementById('userBadge').textContent = currentUser.role === 'admin' ? '管理员' : '玩家'
+            document.getElementById('userBadge').className = `user-badge ${currentUser.role}`
+            document.getElementById('userBalance').textContent = `余额: ¥${currentUser.balance || 0}`
+
+            // Load home page first, then apply admin visibility
+            showPage('home')
+            
+            document.querySelectorAll('.admin-only').forEach(el => {
+                el.style.display = currentUser.role === 'admin' ? 'block' : 'none'
+            })
+            document.getElementById('userBalanceStat').textContent = `¥${currentUser.balance || 0}`
+
+            try {
+                loadAnnouncements()
+                loadMessages()
+            } catch (error) {
+                console.error('Failed to load board data:', error)
+            }
+        }
+
+        // === 图片上传 ===
+        let announcementImageData = null
+        let messageImageData = null
+
+        async function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader()
+                reader.onload = () => resolve(reader.result)
+                reader.onerror = reject
+                reader.readAsDataURL(file)
+            })
+        }
+
+        function handleAnnouncementImageUpload(event) {
+            const file = event.target.files[0]
+            if (!file) return
+            fileToBase64(file).then(dataUrl => {
+                announcementImageData = dataUrl
+                document.getElementById('announcementUploadPlaceholder').textContent = file.name
+                document.getElementById('announcementUploadPlaceholder').style.display = 'block'
+                document.getElementById('announcementImagePreview').src = dataUrl
+                document.getElementById('announcementImagePreview').style.display = 'block'
+            }).catch(() => {
+                alert('图片读取失败')
+            })
+        }
+
+        function handleMessageImageUpload(event) {
+            const file = event.target.files[0]
+            if (!file) return
+            fileToBase64(file).then(dataUrl => {
+                messageImageData = dataUrl
+                document.getElementById('messageImageName').textContent = file.name
+            }).catch(() => {
+                alert('图片读取失败')
+            })
+        }
+
+        // === 北京时间格式化 ===
+        function toBeijingTime(dateStr) {
+            if (!dateStr) return ''
+            try {
+                // SQLite 返回的 datetime 不带时区标记（如 "2026-09-13 16:17:46"），视为 UTC
+                const d = new Date(dateStr.includes('T') ? dateStr : dateStr.replace(' ', 'T') + 'Z')
+                if (isNaN(d.getTime())) return dateStr
+                // 使用 toLocaleString 指定 Asia/Shanghai 时区（北京时间）
+                return d.toLocaleString('zh-CN', {
+                    timeZone: 'Asia/Shanghai',
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit',
+                    hour12: false
+                }).replace(/\//g, '-')
+            } catch (e) {
+                return dateStr
+            }
+        }
+
+        // === 公告栏 ===
+        async function loadAnnouncements() {
+            try {
+                const res = await fetch(`${API_BASE}/announcements`)
+                const data = await res.json()
+                const board = document.getElementById('announcementBoard')
+                const userData = JSON.parse(localStorage.getItem('user') || '{}')
+                const isAdmin = userData.role === 'admin'
+                const token = localStorage.getItem('token')
+                if (data.success && data.data && data.data.length > 0) {
+                    board.innerHTML = data.data.map(ann => {
+                        const isDisplayed = ann.is_displayed == 1
+                        const isPinned = ann.is_pinned == 1
+                        const hasImage = ann.image && ann.image.trim() !== ''
+                        return `
+                            <div class="announcement-item" style="background: ${isPinned ? 'rgba(255,215,0,0.1)' : 'rgba(255,215,0,0.03)'}; border-radius: 8px; padding: 16px; border-left: 4px solid ${isPinned ? '#ffd700' : isDisplayed ? '#ffa500' : '#666'}; margin-bottom: 8px;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; cursor: pointer;" onclick="toggleAnnouncement(this)">
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        ${isPinned ? '<span style="color: #ffd700; font-size: 14px;">📌</span>' : ''}
+                                        <span style="font-size: 18px; font-weight: bold; color: ${isPinned ? '#ffd700' : '#eee'};">
+                                            ${ann.title}
+                                        </span>
+                                        <span style="font-size: 12px; color: #888;">${toBeijingTime(ann.created_at)}</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 8px;">
+                                        ${!isDisplayed ? '<span style="color: #666; font-size: 12px;">[折叠]</span>' : ''}
+                                        <span style="color: #888; font-size: 12px;">${isPinned ? '已置顶' : ''}</span>
+                                    </div>
+                                </div>
+                                <div class="announcement-body" style="display: ${isDisplayed ? 'block' : 'none'}; margin-top: 12px;">
+                                    ${ann.content ? `<div style="color: #ccc; line-height: 1.6; white-space: pre-wrap;">${ann.content}</div>` : ''}
+                                    ${hasImage ? `<img src="${ann.image}" style="max-width: 100%; max-height: 400px; border-radius: 8px; margin-top: 8px; display: block;" onerror="this.style.display='none'">` : ''}
+                                    ${isAdmin ? `
+                                        <div style="display: flex; gap: 8px; margin-top: 12px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.05);">
+                                            <button class="btn btn-small" style="background: ${isPinned ? '#666' : '#ffd700'}; color: #000; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;" onclick="event.stopPropagation(); togglePin(${ann.id}, ${isPinned ? 0 : 1})">
+                                                ${isPinned ? '取消置顶' : '置顶'}
+                                            </button>
+                                            <button class="btn btn-small" style="background: ${isDisplayed ? '#666' : '#ffa500'}; color: #000; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;" onclick="event.stopPropagation(); toggleDisplay(${ann.id}, ${isDisplayed ? 0 : 1})">
+                                                ${isDisplayed ? '折叠' : '显示'}
+                                            </button>
+                                            <button class="btn btn-small" style="background: #e74c3c; color: #fff; border: none; padding: 4px 12px; border-radius: 4px; cursor: pointer; font-size: 12px;" onclick="event.stopPropagation(); deleteAnnouncement(${ann.id})">
+                                                删除
+                                            </button>
+                                        </div>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `
+                    }).join('')
+                } else {
+                    board.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无公告</p>'
+                }
+            } catch (e) {
+                document.getElementById('announcementBoard').innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 20px;">加载公告失败</p>'
+            }
+        }
+
+        function toggleAnnouncement(el) {
+            const body = el.parentElement.querySelector('.announcement-body')
+            if (body) {
+                body.style.display = body.style.display === 'none' ? 'block' : 'none'
+            }
+        }
+
+        async function togglePin(id, isPinned) {
+            const token = localStorage.getItem('token')
+            try {
+                await fetch(`${API_BASE}/admin/announcements/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ is_pinned: isPinned })
+                })
+                loadAnnouncements()
+            } catch (e) {
+                alert('操作失败')
+            }
+        }
+
+        async function toggleDisplay(id, isDisplayed) {
+            const token = localStorage.getItem('token')
+            try {
+                await fetch(`${API_BASE}/admin/announcements/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ is_displayed: isDisplayed })
+                })
+                loadAnnouncements()
+            } catch (e) {
+                alert('操作失败')
+            }
+        }
+
+        async function deleteAnnouncement(id) {
+            if (!confirm('确定删除此公告吗？')) return
+            const token = localStorage.getItem('token')
+            try {
+                const res = await fetch(`${API_BASE}/admin/announcements/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await res.json()
+                if (data.success) {
+                    loadAnnouncements()
+                    showAutoIndicator('公告已删除')
+                }
+            } catch (e) {
+                alert('删除失败')
+            }
+        }
+
+        async function publishAnnouncement() {
+            const btn = document.getElementById('btnPublishAnnouncement')
+            if (btn && btn.disabled) return
+            if (btn) lockBtn(btn)
+            try {
+                const title = document.getElementById('announcementTitle').value
+                const content = document.getElementById('announcementContent').value
+                if (!title) {
+                    alert('请输入公告标题')
+                    unlockBtn(btn)
+                    return
+                }
+                const token = localStorage.getItem('token')
+                const body = { title, content: content || '' }
+                if (announcementImageData) {
+                    body.image = announcementImageData
+                }
+                const res = await fetch(`${API_BASE}/admin/announcements`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                })
+                const data = await res.json()
+                if (data.success) {
+                    document.getElementById('announcementTitle').value = ''
+                    document.getElementById('announcementContent').value = ''
+                    announcementImageData = null
+                    document.getElementById('announcementUploadPlaceholder').textContent = '📷 点击上传公告图片（可选）'
+                    document.getElementById('announcementImagePreview').style.display = 'none'
+                    document.getElementById('announcementImage').value = ''
+                    loadAnnouncements()
+                    showAutoIndicator('公告已发布')
+                }
+            } catch (error) {
+                alert('发布失败：' + error.message)
+            } finally {
+                if (btn) unlockBtn(btn)
+            }
+        }
+
+        // === 留言板 ===
+        async function loadMessages() {
+            try {
+                const res = await fetch(`${API_BASE}/messages`)
+                const data = await res.json()
+                const list = document.getElementById('messageList')
+                const userData = JSON.parse(localStorage.getItem('user') || '{}')
+                const isAdmin = userData.role === 'admin'
+                const token = localStorage.getItem('token')
+                if (data.success && data.data && data.data.length > 0) {
+                    list.innerHTML = data.data.map(m => {
+                        const hasImage = m.image && m.image.trim() !== ''
+                        return `
+                            <div class="message-item" style="padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                                    <div style="flex: 1;">
+                                        <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                                            <span style="color: #ffd700; font-weight: bold;">${m.username}</span>
+                                            <span style="font-size: 12px; color: #888;">${toBeijingTime(m.created_at)}</span>
+                                        </div>
+                                        <div style="color: #ccc; line-height: 1.5; white-space: pre-wrap;">${m.content}</div>
+                                        ${hasImage ? `<img src="${m.image}" style="max-width: 100%; max-height: 300px; border-radius: 8px; margin-top: 8px; display: block;" onerror="this.style.display='none'">` : ''}
+                                    </div>
+                                    ${isAdmin ? `
+                                        <button class="btn btn-small" style="background: #e74c3c; color: #fff; border: none; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 11px; margin-left: 8px;" onclick="deleteMessage(${m.id})">
+                                            删除
+                                        </button>
+                                    ` : ''}
+                                </div>
+                            </div>
+                        `
+                    }).join('')
+                } else {
+                    list.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无留言</p>'
+                }
+            } catch (e) {
+                document.getElementById('messageList').innerHTML = '<p style="color: #e74c3c; text-align: center; padding: 20px;">加载留言失败</p>'
+            }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('确定删除此留言吗？')) return
+            const token = localStorage.getItem('token')
+            try {
+                const res = await fetch(`${API_BASE}/admin/messages/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await res.json()
+                if (data.success) {
+                    loadMessages()
+                    showAutoIndicator('留言已删除')
+                }
+            } catch (e) {
+                alert('删除失败')
+            }
+        }
+
+        async function sendMessage() {
+            const btn = document.getElementById('btnSendMessage')
+            if (btn && btn.disabled) return
+            if (btn) lockBtn(btn)
+            try {
+                const input = document.getElementById('messageInput')
+                const content = input.value.trim()
+                if (!content) {
+                    alert('请输入留言内容')
+                    unlockBtn(btn)
+                    return
+                }
+                const token = localStorage.getItem('token')
+                const body = { content }
+                if (messageImageData) {
+                    body.image = messageImageData
+                }
+                const res = await fetch(`${API_BASE}/messages`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify(body)
+                })
+                const data = await res.json()
+                if (data.success) {
+                    input.value = ''
+                    messageImageData = null
+                    document.getElementById('messageImageName').textContent = ''
+                    document.getElementById('messageImage').value = ''
+                    loadMessages()
+                } else {
+                    alert(data.error || '发送失败')
+                }
+            } catch (error) {
+                alert('发送失败：' + error.message)
+            } finally {
+                if (btn) unlockBtn(btn)
+            }
+        }
+
+        async function loadUserAssets() {
+            const token = localStorage.getItem('token')
+            try {
+                const res = await fetch(`${API_BASE}/user/assets`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await res.json()
+                if (data.success) {
+                    const { balance, debts, rewards, penalties } = data.data
+                    document.getElementById('assetsBalance').textContent = `¥${balance || 0}`
+                    document.getElementById('assetsDebts').textContent = (debts || []).length
+                    document.getElementById('assetsRewards').textContent = (rewards || []).length
+                    document.getElementById('assetsPenalties').textContent = (penalties || []).length
+
+                    const debtsList = document.getElementById('assetDebtsList')
+                    if (debts.length === 0) {
+                        debtsList.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无欠款</p>'
+                    } else {
+                        debtsList.innerHTML = debts.map(d => `
+                            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <div style="font-weight: bold; color: #ff6b6b;">${d.name}</div>
+                                    ${d.description ? `<div style="font-size: 12px; color: #aaa;">${d.description}</div>` : ''}
+                                </div>
+                                <div style="font-weight: bold; color: #ff4444;">¥${d.amount || d.value || 0}</div>
+                            </div>
+                        `).join('')
+                    }
+
+                    const rewardsList = document.getElementById('assetRewardsList')
+                    if (rewards.length === 0) {
+                        rewardsList.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无奖励</p>'
+                    } else {
+                        rewardsList.innerHTML = rewards.map(r => `
+                            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <div style="font-weight: bold; color: #28a745;">${r.name}</div>
+                                    ${r.description ? `<div style="font-size: 12px; color: #aaa;">${r.description}</div>` : ''}
+                                </div>
+                                <div style="font-weight: bold; color: #28a745;">¥${r.value || 0}</div>
+                            </div>
+                        `).join('')
+                    }
+
+                    const penaltiesList = document.getElementById('assetPenaltiesList')
+                    if (penalties.length === 0) {
+                        penaltiesList.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无惩罚</p>'
+                    } else {
+                        penaltiesList.innerHTML = penalties.map(p => `
+                            <div style="display: flex; justify-content: space-between; padding: 12px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                                <div>
+                                    <div style="font-weight: bold; color: #ff4444;">${p.name}</div>
+                                    ${p.description ? `<div style="font-size: 12px; color: #aaa;">${p.description}</div>` : ''}
+                                </div>
+                                <div style="font-weight: bold; color: #ff4444;">¥${p.amount || p.value || 0}</div>
+                            </div>
+                        `).join('')
+                    }
+                }
+            } catch (error) {
+                console.error('Failed to load assets:', error)
+            }
+        }
+
+        function showPage(pageId) {
+            const container = document.querySelector('.container')
+            
+            // Load page content from PAGE_CONTENT if not already in DOM
+            let pageEl = document.getElementById(pageId)
+            if (!pageEl && PAGE_CONTENT[pageId]) {
+                const temp = document.createElement('div')
+                temp.innerHTML = PAGE_CONTENT[pageId]
+                pageEl = temp.firstElementChild
+                if (pageEl && pageEl.id === pageId) {
+                    container.appendChild(pageEl)
+                }
+            }
+            
+            if (!pageEl) return
+            
+            // Apply admin visibility to newly loaded page
+            if (currentUser) {
+                pageEl.querySelectorAll('.admin-only').forEach(el => {
+                    el.style.display = currentUser.role === 'admin' ? 'block' : 'none'
+                })
+            }
+            
+            // Hide all pages, show selected
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'))
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'))
+            pageEl.classList.add('active')
+            
+            // Mark the active nav button
+            document.querySelectorAll('.nav-btn').forEach(b => {
+                if (b.textContent.trim() === pageId || b.getAttribute('onclick')?.includes(pageId)) {
+                    b.classList.add('active')
+                }
+            })
+
+            if (pageId === 'shop') {
+                loadShop()
+            }
+            if (pageId === 'assets') {
+                loadUserAssets()
+            }
+            if (pageId === 'bank') {
+                loadBank()
+            }
+            if (pageId === 'admin' && currentUser && currentUser.role === 'admin') {
+                loadAdminRewards()
+                loadAdminPenalties()
+                loadLoanConfig()
+                loadAdminBankStatus()
+                loadAdminLoans()
+            }
+            if (pageId === 'users' && currentUser && currentUser.role === 'admin') {
+                loadUsers()
+            }
+        }
+
+        function openUserBalanceModalForSelectedUser() {
+            if (!selectedUser) {
+                alert('请先选择用户')
+                return
+            }
+            openUserBalanceModal(selectedUser.username, selectedUser.balance)
+        }
+
+        async function resetUserPassword() {
+            if (!selectedUser) {
+                alert('请先选择用户')
+                return
+            }
+            
+            const newPassword = prompt(`请输入用户「${selectedUser.username}」的新密码（至少6位）：`)
+            if (!newPassword) return
+            
+            if (newPassword.length < 6) {
+                alert('密码长度不能少于6位')
+                return
+            }
+            
+            const confirmPassword = prompt('请再次输入新密码确认：')
+            if (newPassword !== confirmPassword) {
+                alert('两次输入的密码不一致')
+                return
+            }
+            
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/user/password/reset/${selectedUser.username}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ newPassword })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(`用户「${selectedUser.username}」密码已重置`)
+                } else {
+                    alert(data.error || '密码重置失败')
+                }
+            } catch (error) {
+                alert('密码重置失败：' + error.message)
+            }
+        }
+
+        // 物品管理
+        async function loadUserItems(username) {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/items/${username}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    items = data.data || []
+                    renderItems()
+                }
+            } catch (error) {
+                console.error('Failed to load items:', error)
+                items = []
+                renderItems()
+            }
+        }
+
+        function renderItems() {
+            const container = document.getElementById('itemsList')
+            if (items.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无物品</p>'
+                return
+            }
+            
+            container.innerHTML = items.map(item => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name">${item.name}</div>
+                        <div class="item-desc">价值: ¥${item.value} | ${item.description || '暂无描述'}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-primary" onclick="editItem('${item.id}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteItem('${item.id}', this)">删除</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function openItemModal(item = null) {
+            if (!selectedUser) {
+                alert('请先选择用户')
+                return
+            }
+            
+            editingItemId = item ? item.id : null
+            document.getElementById('itemModalTitle').textContent = item ? '编辑物品' : '添加物品'
+            document.getElementById('itemName').value = item ? item.name : ''
+            document.getElementById('itemValue').value = item ? item.value : ''
+            document.getElementById('itemDesc').value = item ? item.description || '' : ''
+            document.getElementById('itemModal').classList.add('active')
+        }
+
+        function closeItemModal() {
+            document.getElementById('itemModal').classList.remove('active')
+            editingItemId = null
+        }
+
+        async function saveItem() {
+            const btn = document.getElementById('btnSaveItem')
+            if (btn.disabled) return
+            lockBtn(btn)
+            if (!selectedUser) {
+                alert('请先选择用户')
+                unlockBtn(btn); return
+            }
+
+            const name = document.getElementById('itemName').value
+            const value = parseFloat(document.getElementById('itemValue').value)
+            const description = document.getElementById('itemDesc').value
+            const token = localStorage.getItem('token')
+
+            if (!name || isNaN(value)) {
+                alert('请填写完整的物品信息')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const itemData = { username: selectedUser.username, name, value, description }
+                
+                if (editingItemId) {
+                    await fetch(`${API_BASE}/admin/items/${editingItemId}`, {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(itemData)
+                    })
+                } else {
+                    await fetch(`${API_BASE}/admin/items`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(itemData)
+                    })
+                }
+                
+                closeItemModal()
+                loadUserItems(selectedUser.username)
+                showAutoIndicator('物品已保存')
+            } catch (error) {
+                alert('保存失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function editItem(id) {
+            const item = items.find(i => i.id == id)
+            if (item) {
+                openItemModal(item)
+            }
+        }
+
+        async function deleteItem(id) {
+            if (confirm('确定要删除这个物品吗？')) {
+                const token = localStorage.getItem('token')
+                try {
+                    await fetch(`${API_BASE}/admin/items/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    loadUserItems(selectedUser.username)
+                    showAutoIndicator('物品已删除')
+                } catch (error) {
+                    alert('删除失败：' + error.message)
+                }
+            }
+        }
+
+        // 奖励管理
+        async function loadUserRewards(username) {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/rewards/${username}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    rewards = data.data || []
+                    renderRewards()
+                }
+            } catch (error) {
+                console.error('Failed to load rewards:', error)
+                rewards = []
+                renderRewards()
+            }
+        }
+
+        function renderRewards() {
+            const container = document.getElementById('rewardsList')
+            if (rewards.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无奖励</p>'
+                return
+            }
+            
+            container.innerHTML = rewards.map(reward => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name" style="color: #28a745;">${reward.name}</div>
+                        <div class="item-desc">价值: ¥${reward.value} | ${reward.description || '暂无描述'}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-primary" onclick="editReward('${reward.id}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteReward('${reward.id}', this)">删除</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function openRewardModal(reward = null) {
+            if (!selectedUser) {
+                alert('请先选择用户')
+                return
+            }
+            
+            editingRewardId = reward ? reward.id : null
+            document.getElementById('rewardModalTitle').textContent = reward ? '编辑奖励' : '添加奖励'
+            document.getElementById('rewardName').value = reward ? reward.name : ''
+            document.getElementById('rewardValue').value = reward ? reward.value : ''
+            document.getElementById('rewardDesc').value = reward ? reward.description || '' : ''
+            document.getElementById('rewardModal').classList.add('active')
+        }
+
+        function closeRewardModal() {
+            document.getElementById('rewardModal').classList.remove('active')
+            editingRewardId = null
+        }
+
+        async function saveReward() {
+            const btn = document.getElementById('btnSaveReward')
+            if (btn.disabled) return
+            lockBtn(btn)
+            if (!selectedUser) {
+                alert('请先选择用户')
+                unlockBtn(btn); return
+            }
+
+            const name = document.getElementById('rewardName').value
+            const value = parseFloat(document.getElementById('rewardValue').value)
+            const description = document.getElementById('rewardDesc').value
+            const token = localStorage.getItem('token')
+
+            if (!name || isNaN(value)) {
+                alert('请填写完整的奖励信息')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const rewardData = { username: selectedUser.username, name, value, description }
+                
+                if (editingRewardId) {
+                    await fetch(`${API_BASE}/admin/rewards/${editingRewardId}`, {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(rewardData)
+                    })
+                } else {
+                    await fetch(`${API_BASE}/admin/rewards`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(rewardData)
+                    })
+                }
+                
+                closeRewardModal()
+                loadUserRewards(selectedUser.username)
+                showAutoIndicator('奖励已保存')
+            } catch (error) {
+                alert('保存失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function editReward(id) {
+            const reward = rewards.find(r => r.id == id)
+            if (reward) {
+                openRewardModal(reward)
+            }
+        }
+
+        async function deleteReward(id) {
+            if (confirm('确定要删除这个奖励吗？')) {
+                const token = localStorage.getItem('token')
+                try {
+                    await fetch(`${API_BASE}/admin/rewards/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    loadUserRewards(selectedUser.username)
+                    showAutoIndicator('奖励已删除')
+                } catch (error) {
+                    alert('删除失败：' + error.message)
+                }
+            }
+        }
+
+        // 欠款管理
+        async function loadUserDebts(username) {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/debts/${username}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    debts = data.data || []
+                    renderDebts()
+                }
+            } catch (error) {
+                console.error('Failed to load debts:', error)
+                debts = []
+                renderDebts()
+            }
+        }
+
+        function renderDebts() {
+            const container = document.getElementById('debtsList')
+            if (debts.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无欠款</p>'
+                return
+            }
+            
+            container.innerHTML = debts.map(debt => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name" style="color: #ff6b6b;">${debt.name}</div>
+                        <div class="item-desc">金额: ¥${debt.amount} | ${debt.description || '暂无描述'}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-primary" onclick="editDebt('${debt.id}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteDebt('${debt.id}', this)">删除</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function openDebtModalForSelectedUser() {
+            if (!selectedUser) {
+                alert('请先选择用户')
+                return
+            }
+            openDebtModal()
+        }
+
+        function openDebtModal(debt = null) {
+            if (!selectedUser && !debt) {
+                alert('请先选择用户')
+                return
+            }
+            
+            editingDebtId = debt ? debt.id : null
+            document.getElementById('debtModalTitle').textContent = debt ? '编辑欠款' : '添加欠款'
+            document.getElementById('debtName').value = debt ? debt.name : ''
+            document.getElementById('debtAmount').value = debt ? debt.amount : ''
+            document.getElementById('debtDesc').value = debt ? debt.description || '' : ''
+            document.getElementById('debtModal').classList.add('active')
+        }
+
+        function closeDebtModal() {
+            document.getElementById('debtModal').classList.remove('active')
+            editingDebtId = null
+        }
+
+        async function saveDebt() {
+            const btn = document.getElementById('btnSaveDebt')
+            if (btn.disabled) return
+            lockBtn(btn)
+            if (!selectedUser) {
+                alert('请先选择用户')
+                unlockBtn(btn); return
+            }
+
+            const name = document.getElementById('debtName').value
+            const amount = parseFloat(document.getElementById('debtAmount').value)
+            const description = document.getElementById('debtDesc').value
+            const token = localStorage.getItem('token')
+
+            if (!name || isNaN(amount)) {
+                alert('请填写完整的欠款信息')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const debtData = { username: selectedUser.username, name, amount, description }
+                
+                if (editingDebtId) {
+                    await fetch(`${API_BASE}/admin/debts/${editingDebtId}`, {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(debtData)
+                    })
+                } else {
+                    await fetch(`${API_BASE}/admin/debts`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(debtData)
+                    })
+                }
+                
+                closeDebtModal()
+                loadUserDebts(selectedUser.username)
+                showAutoIndicator('欠款已保存')
+            } catch (error) {
+                alert('保存失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function editDebt(id) {
+            const debt = debts.find(d => d.id == id)
+            if (debt) {
+                openDebtModal(debt)
+            }
+        }
+
+        async function deleteDebt(id) {
+            if (confirm('确定要删除这个欠款吗？')) {
+                const token = localStorage.getItem('token')
+                try {
+                    await fetch(`${API_BASE}/admin/debts/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    loadUserDebts(selectedUser.username)
+                    showAutoIndicator('欠款已删除')
+                } catch (error) {
+                    alert('删除失败：' + error.message)
+                }
+            }
+        }
+
+        // 惩罚管理
+        async function loadUserPenalties(username) {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/penalties/${username}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    penalties = data.data || []
+                    renderPenalties()
+                }
+            } catch (error) {
+                console.error('Failed to load penalties:', error)
+                penalties = []
+                renderPenalties()
+            }
+        }
+
+        function renderPenalties() {
+            const container = document.getElementById('penaltiesList')
+            if (penalties.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无惩罚</p>'
+                return
+            }
+            
+            container.innerHTML = penalties.map(penalty => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name" style="color: #ff4444;">${penalty.name}</div>
+                        <div class="item-desc">金额: ¥${penalty.amount} | ${penalty.description || '暂无描述'}</div>
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn btn-primary" onclick="editPenalty('${penalty.id}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deletePenalty('${penalty.id}', this)">删除</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function openPenaltyModal(penalty = null) {
+            if (!selectedUser) {
+                alert('请先选择用户')
+                return
+            }
+            
+            editingPenaltyId = penalty ? penalty.id : null
+            document.getElementById('penaltyModalTitle').textContent = penalty ? '编辑惩罚' : '添加惩罚'
+            document.getElementById('penaltyName').value = penalty ? penalty.name : ''
+            document.getElementById('penaltyAmount').value = penalty ? penalty.amount : ''
+            document.getElementById('penaltyDesc').value = penalty ? penalty.description || '' : ''
+            document.getElementById('penaltyModal').classList.add('active')
+        }
+
+        function closePenaltyModal() {
+            document.getElementById('penaltyModal').classList.remove('active')
+            editingPenaltyId = null
+        }
+
+        async function savePenalty() {
+            const btn = document.getElementById('btnSavePenalty')
+            if (btn.disabled) return
+            lockBtn(btn)
+            if (!selectedUser) {
+                alert('请先选择用户')
+                unlockBtn(btn); return
+            }
+
+            const name = document.getElementById('penaltyName').value
+            const amount = parseFloat(document.getElementById('penaltyAmount').value)
+            const description = document.getElementById('penaltyDesc').value
+            const token = localStorage.getItem('token')
+
+            if (!name || isNaN(amount)) {
+                alert('请填写完整的惩罚信息')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const penaltyData = { username: selectedUser.username, name, amount, description }
+                
+                if (editingPenaltyId) {
+                    await fetch(`${API_BASE}/admin/penalties/${editingPenaltyId}`, {
+                        method: 'PUT',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(penaltyData)
+                    })
+                } else {
+                    await fetch(`${API_BASE}/admin/penalties`, {
+                        method: 'POST',
+                        headers: { 
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(penaltyData)
+                    })
+                }
+                
+                closePenaltyModal()
+                loadUserPenalties(selectedUser.username)
+                showAutoIndicator('惩罚已保存')
+            } catch (error) {
+                alert('保存失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function editPenalty(id) {
+            const penalty = penalties.find(p => p.id == id)
+            if (penalty) {
+                openPenaltyModal(penalty)
+            }
+        }
+
+        async function deletePenalty(id) {
+            if (confirm('确定要删除这个惩罚吗？')) {
+                const token = localStorage.getItem('token')
+                try {
+                    await fetch(`${API_BASE}/admin/penalties/${id}`, {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    })
+                    loadUserPenalties(selectedUser.username)
+                    showAutoIndicator('惩罚已删除')
+                } catch (error) {
+                    alert('删除失败：' + error.message)
+                }
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE}/products/list`)
+                const data = await response.json()
+                if (data.success) {
+                    products = data.data
+                    renderProducts()
+                }
+            } catch (error) {
+                console.error('Failed to load products:', error)
+            }
+        }
+
+        function renderProducts() {
+            const grid = document.getElementById('productsGrid')
+            if (products.length === 0) {
+                grid.innerHTML = '<p style="color: #aaa; text-align: center; grid-column: 1/-1; padding: 50px;">暂无商品</p>'
+                return
+            }
+            
+            const isAdmin = currentUser.role === 'admin'
+            grid.innerHTML = products.map(product => `
+                <div class="product-card">
+                    <div class="product-image">
+                        ${product.image ? `<img src="${product.image}" alt="${product.name}">` : '<div style="color: #aaa; font-size: 48px;">📷</div>'}
+                    </div>
+                    <div class="product-details">
+                        <div class="product-name">${product.name}</div>
+                        <div class="product-price">¥${product.price}</div>
+                        <div style="color: #aaa; font-size: 14px; margin-bottom: 10px;">${product.description || '暂无描述'}</div>
+                        <div class="product-actions">
+                            ${isAdmin ? `
+                                <button class="btn btn-primary" onclick="editProduct('${product.id}')">编辑</button>
+                                <button class="btn btn-danger" onclick="deleteProduct('${product.id}', this)">删除</button>
+                            ` : `
+                                <button class="btn btn-success" onclick="purchaseProduct('${product.id}')" style="flex: 1;">购买</button>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        function openProductModal(productId = null) {
+            editingProductId = productId
+            currentImageData = null
+            
+            if (productId) {
+                const product = products.find(p => p.id === productId)
+                document.getElementById('modalTitle').textContent = '编辑商品'
+                document.getElementById('productName').value = product.name
+                document.getElementById('productPrice').value = product.price
+                document.getElementById('productDesc').value = product.description || ''
+                if (product.image) {
+                    currentImageData = product.image
+                    document.getElementById('imagePreview').src = product.image
+                    document.getElementById('imagePreview').style.display = 'block'
+                    document.getElementById('uploadPlaceholder').style.display = 'none'
+                }
+            } else {
+                document.getElementById('modalTitle').textContent = '添加商品'
+                document.getElementById('productName').value = ''
+                document.getElementById('productPrice').value = ''
+                document.getElementById('productDesc').value = ''
+                document.getElementById('imagePreview').style.display = 'none'
+                document.getElementById('uploadPlaceholder').style.display = 'block'
+            }
+            
+            document.getElementById('productModal').classList.add('active')
+        }
+
+        function closeProductModal() {
+            document.getElementById('productModal').classList.remove('active')
+            editingProductId = null
+            currentImageData = null
+        }
+
+        function handleImageUpload(event) {
+            const file = event.target.files[0]
+            if (file) {
+                const reader = new FileReader()
+                reader.onload = function(e) {
+                    currentImageData = e.target.result
+                    document.getElementById('imagePreview').src = currentImageData
+                    document.getElementById('imagePreview').style.display = 'block'
+                    document.getElementById('uploadPlaceholder').style.display = 'none'
+                }
+                reader.readAsDataURL(file)
+            }
+        }
+
+        async function saveProduct() {
+            const btn = document.getElementById('btnSaveProduct')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const name = document.getElementById('productName').value
+            const price = parseFloat(document.getElementById('productPrice').value) || 0
+            const description = document.getElementById('productDesc').value
+
+            if (!name) {
+                alert('请输入商品名称')
+                unlockBtn(btn)
+                return
+            }
+
+            const token = localStorage.getItem('token')
+            const productData = {
+                name,
+                price,
+                description,
+                image: currentImageData
+            }
+
+            try {
+                let response
+                if (editingProductId) {
+                    response = await fetch(`${API_BASE}/admin/products`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ id: editingProductId, ...productData })
+                    })
+                } else {
+                    response = await fetch(`${API_BASE}/admin/products`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify(productData)
+                    })
+                }
+
+                const data = await response.json()
+                if (data.success) {
+                    closeProductModal()
+                    loadProducts()
+                    showAutoIndicator('商品已保存')
+                }
+            } catch (error) {
+                alert('保存失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function editProduct(id) {
+            openProductModal(id)
+        }
+
+        async function deleteProduct(id) {
+            if (confirm('确定要删除这个商品吗？')) {
+                const token = localStorage.getItem('token')
+                try {
+                    await fetch(`${API_BASE}/admin/products`, {
+                        method: 'DELETE',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ id })
+                    })
+                    loadProducts()
+                    showAutoIndicator('商品已删除')
+                } catch (error) {
+                    alert('删除失败：' + error.message)
+                }
+            }
+        }
+
+        async function loadUsers() {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/users`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    renderUsers(data.data)
+                }
+            } catch (error) {
+                console.error('Failed to load users:', error)
+            }
+        }
+
+        function renderUsers(users) {
+            const container = document.getElementById('usersList')
+            container.dataset.users = JSON.stringify(users)
+            container.innerHTML = users.map(user => {
+                const isAdmin = user.role === 'admin'
+                return `
+                <div class="player-card" style="cursor: pointer;" onclick="selectUser('${user.username}', ${user.balance})">
+                    <div class="player-header">
+                        <div>
+                            <div class="player-name">${user.username}</div>
+                            <div style="font-size: 12px; color: #aaa;">注册时间: ${new Date(user.created_at).toLocaleDateString()}</div>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px;">
+                            <div class="player-role ${user.role}">${isAdmin ? '管理员' : '玩家'}</div>
+                            ${!isAdmin ? `<button class="btn btn-danger" style="padding: 4px 10px; font-size: 12px;" onclick="event.stopPropagation();deleteUser('${user.username}', this)">删除</button>` : ''}
+                        </div>
+                    </div>
+                    <div class="player-stats">
+                        <div class="player-stat">
+                            <div class="player-stat-value">¥${user.balance}</div>
+                            <div class="player-stat-label">余额</div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('')
+        }
+
+        function selectUser(username, balance) {
+            selectedUser = { username, balance }
+            document.getElementById('selectedUserName').textContent = username
+            document.getElementById('userBalanceDisplay').textContent = `¥${balance}`
+            document.getElementById('userDetailSection').style.display = 'block'
+            document.getElementById('usersList').parentElement.style.display = 'none'
+            
+            loadUserItems(username)
+            loadUserRewards(username)
+            loadUserDebts(username)
+            loadUserPenalties(username)
+        }
+
+        function closeUserDetail() {
+            document.getElementById('userDetailSection').style.display = 'none'
+            document.getElementById('usersList').parentElement.style.display = 'block'
+            selectedUser = null
+            loadUsers()
+        }
+
+        async function deleteUser(username, btn) {
+            if (btn && btn.disabled) return
+            if (btn) lockBtn(btn)
+            try {
+                if (!confirm(`确定要删除用户「${username}」吗？\n此操作将同时删除该用户的所有物品、奖励、欠款、惩罚、购买记录和贷款记录，且不可恢复！`)) {
+                    if (btn) unlockBtn(btn)
+                    return
+                }
+                const token = localStorage.getItem('token')
+                const response = await fetch(`${API_BASE}/admin/users/${username}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(`用户「${username}」已删除`)
+                    loadUsers()
+                } else {
+                    alert(data.error || '删除失败')
+                }
+            } catch (error) {
+                alert('删除失败：' + error.message)
+            } finally {
+                if (btn) unlockBtn(btn)
+            }
+        }
+
+        function openUserBalanceModal(username, balance) {
+            editingUserBalance = username
+            document.getElementById('balanceUsername').value = username
+            document.getElementById('newBalance').value = balance
+            document.getElementById('userBalanceModal').classList.add('active')
+        }
+
+        function closeUserBalanceModal() {
+            document.getElementById('userBalanceModal').classList.remove('active')
+            editingUserBalance = null
+        }
+
+        async function updateUserBalance() {
+            const btn = document.getElementById('btnUpdateBalance')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const username = document.getElementById('balanceUsername').value
+            const newBalance = parseFloat(document.getElementById('newBalance').value) || 0
+            const token = localStorage.getItem('token')
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/users/${username}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ balance: newBalance })
+                })
+
+                const data = await response.json()
+                if (data.success) {
+                    closeUserBalanceModal()
+                    
+                    if (selectedUser && selectedUser.username === username) {
+                        selectedUser.balance = newBalance
+                        document.getElementById('userBalanceDisplay').textContent = `¥${newBalance}`
+                    }
+                    
+                    loadUsers()
+                    showAutoIndicator('用户余额已更新')
+                }
+            } catch (error) {
+                alert('更新失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function showSaveStatus(elementId) {
+            const element = document.getElementById(elementId)
+            element.classList.add('show')
+            setTimeout(() => {
+                element.classList.remove('show')
+            }, 2000)
+        }
+
+        // 按钮禁用/恢复辅助函数
+        function lockBtn(btn) {
+            if (!btn) return
+            btn.disabled = true
+            btn.style.opacity = '0.5'
+            btn.style.cursor = 'not-allowed'
+        }
+        function unlockBtn(btn) {
+            if (!btn) return
+            btn.disabled = false
+            btn.style.opacity = '1'
+            btn.style.cursor = 'pointer'
+        }
+        async function withBtnLock(btn, callback) {
+            if (!btn || btn.disabled) return
+            lockBtn(btn)
+            try {
+                return await callback()
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        function showAutoIndicator(message) {
+            const indicator = document.getElementById('autoSaveIndicator')
+            indicator.textContent = '✓ ' + message
+            indicator.classList.add('show')
+            setTimeout(() => {
+                indicator.classList.remove('show')
+            }, 2000)
+        }
+
+        // 管理后台 - 奖励管理
+        let adminRewards = []
+        let editingAdminRewardId = null
+        let adminRewardImageData = null
+
+        async function loadAdminRewards() {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/reward-types`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    adminRewards = data.data || []
+                    renderAdminRewards()
+                }
+            } catch (error) {
+                console.error('Failed to load admin rewards:', error)
+            }
+        }
+
+        function renderAdminRewards() {
+            const container = document.getElementById('adminRewardsList')
+            if (adminRewards.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无奖励，请点击"添加奖励"</p>'
+                return
+            }
+            
+            container.innerHTML = adminRewards.map(reward => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name" style="color: #28a745;">${reward.name}</div>
+                        <div class="item-desc">价格: ¥${reward.price} | ${reward.description || '暂无描述'}</div>
+                        <div class="item-desc" style="color: ${reward.shop_enabled ? '#28a745' : '#ff6b6b'}; font-size: 12px;">
+                            ${reward.shop_enabled ? '✅ 已上架商店' : '❌ 未上架商店'}
+                        </div>
+                        ${reward.image ? '<div style="margin-top: 5px;"><img src="' + reward.image + '" style="max-width: 100px; max-height: 100px; border-radius: 8px;"></div>' : ''}
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn ${reward.shop_enabled ? 'btn-warning' : 'btn-success'}" onclick="toggleShopReward('${reward.id}', ${reward.shop_enabled ? 0 : 1}, this)">
+                            ${reward.shop_enabled ? '下架' : '上架'}
+                        </button>
+                        <button class="btn btn-primary" onclick="editAdminReward('${reward.id}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteAdminReward('${reward.id}', this)">删除</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        async function toggleShopReward(id, enabled, btn) {
+            const token = localStorage.getItem('token')
+            const reward = adminRewards.find(r => r.id == id)
+            if (!reward) return
+            try {
+                const response = await fetch(`${API_BASE}/admin/reward-types/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ 
+                        name: reward.name, 
+                        price: reward.price, 
+                        description: reward.description || '', 
+                        image: reward.image || '',
+                        shop_enabled: enabled 
+                    })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    loadAdminRewards()
+                    showAutoIndicator(enabled ? '已上架到商店' : '已从商店下架')
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+            }
+        }
+
+        function openAdminRewardModal(reward = null) {
+            editingAdminRewardId = reward ? reward.id : null
+            document.getElementById('adminRewardModalTitle').textContent = reward ? '编辑奖励' : '添加奖励'
+            document.getElementById('adminRewardName').value = reward ? reward.name : ''
+            document.getElementById('adminRewardPrice').value = reward ? reward.price : ''
+            document.getElementById('adminRewardDesc').value = reward ? reward.description || '' : ''
+            
+            if (reward && reward.image) {
+                adminRewardImageData = reward.image
+                document.getElementById('adminRewardImagePreview').src = reward.image
+                document.getElementById('adminRewardImagePreview').style.display = 'block'
+                document.getElementById('adminRewardUploadPlaceholder').style.display = 'none'
+            } else {
+                adminRewardImageData = null
+                document.getElementById('adminRewardImagePreview').style.display = 'none'
+                document.getElementById('adminRewardUploadPlaceholder').style.display = 'block'
+            }
+            
+            document.getElementById('adminRewardModal').classList.add('active')
+        }
+
+        function closeAdminRewardModal() {
+            document.getElementById('adminRewardModal').classList.remove('active')
+            editingAdminRewardId = null
+            adminRewardImageData = null
+        }
+
+        function handleAdminRewardImageUpload(event) {
+            const file = event.target.files[0]
+            if (file) {
+                const reader = new FileReader()
+                reader.onload = function(e) {
+                    adminRewardImageData = e.target.result
+                    document.getElementById('adminRewardImagePreview').src = e.target.result
+                    document.getElementById('adminRewardImagePreview').style.display = 'block'
+                    document.getElementById('adminRewardUploadPlaceholder').style.display = 'none'
+                }
+                reader.readAsDataURL(file)
+            }
+        }
+
+        function editAdminReward(id) {
+            const reward = adminRewards.find(r => r.id == id)
+            if (reward) {
+                openAdminRewardModal(reward)
+            }
+        }
+
+        async function saveAdminReward() {
+            const btn = document.getElementById('btnSaveAdminReward')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const name = document.getElementById('adminRewardName').value
+            const price = parseFloat(document.getElementById('adminRewardPrice').value)
+            const description = document.getElementById('adminRewardDesc').value
+            const token = localStorage.getItem('token')
+
+            if (!name) {
+                alert('请输入奖励名称')
+                unlockBtn(btn); return
+            }
+            if (isNaN(price) || price < 0) {
+                alert('请输入有效的价格')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const url = editingAdminRewardId 
+                    ? `${API_BASE}/admin/reward-types/${editingAdminRewardId}`
+                    : `${API_BASE}/admin/reward-types`
+                
+                const method = editingAdminRewardId ? 'PUT' : 'POST'
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, price, description, image: adminRewardImageData })
+                })
+
+                const data = await response.json()
+                if (data.success) {
+                    closeAdminRewardModal()
+                    loadAdminRewards()
+                    showAutoIndicator(editingAdminRewardId ? '奖励已更新' : '奖励已添加')
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        async function deleteAdminReward(id) {
+            if (!confirm('确定要删除这个奖励吗？')) return
+
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/reward-types/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    loadAdminRewards()
+                    showAutoIndicator('奖励已删除')
+                }
+            } catch (error) {
+                alert('删除失败：' + error.message)
+            }
+        }
+
+        // 管理后台 - 惩罚管理
+        let adminPenalties = []
+        let editingAdminPenaltyId = null
+        let adminPenaltyImageData = null
+
+        async function loadAdminPenalties() {
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/penalty-types`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    adminPenalties = data.data || []
+                    renderAdminPenalties()
+                }
+            } catch (error) {
+                console.error('Failed to load admin penalties:', error)
+            }
+        }
+
+        function renderAdminPenalties() {
+            const container = document.getElementById('adminPenaltiesList')
+            if (adminPenalties.length === 0) {
+                container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无惩罚，请点击"添加惩罚"</p>'
+                return
+            }
+            
+            container.innerHTML = adminPenalties.map(penalty => `
+                <div class="item-card">
+                    <div class="item-info">
+                        <div class="item-name" style="color: #ff4444;">${penalty.name}</div>
+                        <div class="item-desc">消除价格: ¥${penalty.price} | ${penalty.description || '暂无描述'}</div>
+                        <div class="item-desc" style="color: ${penalty.shop_enabled ? '#28a745' : '#ff6b6b'}; font-size: 12px;">
+                            ${penalty.shop_enabled ? '✅ 已上架商店' : '❌ 未上架商店'}
+                        </div>
+                        ${penalty.image ? '<div style="margin-top: 5px;"><img src="' + penalty.image + '" style="max-width: 100px; max-height: 100px; border-radius: 8px;"></div>' : ''}
+                    </div>
+                    <div class="item-actions">
+                        <button class="btn ${penalty.shop_enabled ? 'btn-warning' : 'btn-success'}" onclick="toggleShopPenalty('${penalty.id}', ${penalty.shop_enabled ? 0 : 1}, this)">
+                            ${penalty.shop_enabled ? '下架' : '上架'}
+                        </button>
+                        <button class="btn btn-primary" onclick="editAdminPenalty('${penalty.id}')">编辑</button>
+                        <button class="btn btn-danger" onclick="deleteAdminPenalty('${penalty.id}', this)">删除</button>
+                    </div>
+                </div>
+            `).join('')
+        }
+
+        async function toggleShopPenalty(id, enabled, btn) {
+            const token = localStorage.getItem('token')
+            const penalty = adminPenalties.find(p => p.id == id)
+            if (!penalty) return
+            try {
+                const response = await fetch(`${API_BASE}/admin/penalty-types/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ 
+                        name: penalty.name, 
+                        price: penalty.price, 
+                        description: penalty.description || '', 
+                        image: penalty.image || '',
+                        shop_enabled: enabled 
+                    })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    loadAdminPenalties()
+                    showAutoIndicator(enabled ? '已上架到商店' : '已从商店下架')
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+            }
+        }
+
+        function openAdminPenaltyModal(penalty = null) {
+            editingAdminPenaltyId = penalty ? penalty.id : null
+            document.getElementById('adminPenaltyModalTitle').textContent = penalty ? '编辑惩罚' : '添加惩罚'
+            document.getElementById('adminPenaltyName').value = penalty ? penalty.name : ''
+            document.getElementById('adminPenaltyPrice').value = penalty ? penalty.price : ''
+            document.getElementById('adminPenaltyDesc').value = penalty ? penalty.description || '' : ''
+            
+            if (penalty && penalty.image) {
+                adminPenaltyImageData = penalty.image
+                document.getElementById('adminPenaltyImagePreview').src = penalty.image
+                document.getElementById('adminPenaltyImagePreview').style.display = 'block'
+                document.getElementById('adminPenaltyUploadPlaceholder').style.display = 'none'
+            } else {
+                adminPenaltyImageData = null
+                document.getElementById('adminPenaltyImagePreview').style.display = 'none'
+                document.getElementById('adminPenaltyUploadPlaceholder').style.display = 'block'
+            }
+            
+            document.getElementById('adminPenaltyModal').classList.add('active')
+        }
+
+        function closeAdminPenaltyModal() {
+            document.getElementById('adminPenaltyModal').classList.remove('active')
+            editingAdminPenaltyId = null
+            adminPenaltyImageData = null
+        }
+
+        function handleAdminPenaltyImageUpload(event) {
+            const file = event.target.files[0]
+            if (file) {
+                const reader = new FileReader()
+                reader.onload = function(e) {
+                    adminPenaltyImageData = e.target.result
+                    document.getElementById('adminPenaltyImagePreview').src = e.target.result
+                    document.getElementById('adminPenaltyImagePreview').style.display = 'block'
+                    document.getElementById('adminPenaltyUploadPlaceholder').style.display = 'none'
+                }
+                reader.readAsDataURL(file)
+            }
+        }
+
+        function editAdminPenalty(id) {
+            const penalty = adminPenalties.find(p => p.id == id)
+            if (penalty) {
+                openAdminPenaltyModal(penalty)
+            }
+        }
+
+        async function saveAdminPenalty() {
+            const btn = document.getElementById('btnSaveAdminPenalty')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const name = document.getElementById('adminPenaltyName').value
+            const price = parseFloat(document.getElementById('adminPenaltyPrice').value)
+            const description = document.getElementById('adminPenaltyDesc').value
+            const token = localStorage.getItem('token')
+
+            if (!name) {
+                alert('请输入惩罚名称')
+                unlockBtn(btn); return
+            }
+            if (isNaN(price) || price < 0) {
+                alert('请输入有效的价格')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const url = editingAdminPenaltyId 
+                    ? `${API_BASE}/admin/penalty-types/${editingAdminPenaltyId}`
+                    : `${API_BASE}/admin/penalty-types`
+                
+                const method = editingAdminPenaltyId ? 'PUT' : 'POST'
+
+                const response = await fetch(url, {
+                    method,
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ name, price, description, image: adminPenaltyImageData })
+                })
+
+                const data = await response.json()
+                if (data.success) {
+                    closeAdminPenaltyModal()
+                    loadAdminPenalties()
+                    showAutoIndicator(editingAdminPenaltyId ? '惩罚已更新' : '惩罚已添加')
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        async function deleteAdminPenalty(id) {
+            if (!confirm('确定要删除这个惩罚吗？')) return
+
+            const token = localStorage.getItem('token')
+            try {
+                const response = await fetch(`${API_BASE}/admin/penalty-types/${id}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    loadAdminPenalties()
+                    showAutoIndicator('惩罚已删除')
+                }
+            } catch (error) {
+                alert('删除失败：' + error.message)
+            }
+        }
+
+        // ==================== 商店页面 ====================
+        async function loadShop() {
+            await Promise.all([
+                loadShopRewards(),
+                loadShopPenalties(),
+                loadShopProducts()
+            ])
+        }
+
+        async function loadShopRewards() {
+            const container = document.getElementById('shopRewardsList')
+            try {
+                const response = await fetch(`${API_BASE}/shop/rewards`)
+                const data = await response.json()
+                if (data.success && data.data.length > 0) {
+                    container.innerHTML = data.data.map(reward => `
+                        <div class="item-card" style="border-left: 3px solid #28a745; display: flex; flex-direction: column;">
+                            ${reward.image ? `<img src="${reward.image}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;">` : ''}
+                            <div class="item-info" style="flex: 1;">
+                                <div class="item-name" style="color: #28a745; font-size: 16px; font-weight: 600;">${reward.name}</div>
+                                <div class="item-desc" style="color: #ffd700; font-size: 14px; margin: 4px 0;">价格: ¥${reward.price}</div>
+                                ${reward.description ? `<div class="item-desc" style="font-size: 12px; color: #aaa; margin-bottom: 8px;">${reward.description}</div>` : ''}
+                            </div>
+                            <div class="item-actions" style="display: flex; align-items: center; gap: 6px; margin-top: auto;">
+                                <input type="number" id="rewardQty_${reward.id}" value="1" min="1" max="99" style="width: 50px; background: #1a1a2e; color: #fff; border: 1px solid #333; padding: 6px; border-radius: 4px; text-align: center;">
+                                <button id="btnRedeem_${reward.id}" class="btn btn-success" onclick="redeemReward(${reward.id})" style="flex:1;">兑换</button>
+                            </div>
+                        </div>
+                    `).join('')
+                } else {
+                    container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无上架奖励</p>'
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ff4444; text-align: center; padding: 20px;">加载失败</p>'
+            }
+        }
+
+        async function redeemReward(rewardId) {
+            const token = localStorage.getItem('token')
+            if (!token) { alert('请先登录'); return }
+            const btn = document.getElementById(`btnRedeem_${rewardId}`)
+            if (!btn || btn.disabled) return
+            btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'
+            const qtyInput = document.getElementById(`rewardQty_${rewardId}`)
+            const quantity = parseInt(qtyInput ? qtyInput.value : 1) || 1
+            try {
+                const response = await fetch(`${API_BASE}/shop/redeem-reward`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ rewardId, quantity })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(data.message)
+                    const user = JSON.parse(localStorage.getItem('user') || '{}')
+                    user.balance = data.balance
+                    localStorage.setItem('user', JSON.stringify(user))
+                    updateBalance(data.balance)
+                    loadShopRewards()
+                } else {
+                    alert(data.error)
+                    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'
+                }
+            } catch (error) {
+                alert('兑换失败：' + error.message)
+                btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'
+            }
+        }
+
+        async function loadShopPenalties() {
+            const container = document.getElementById('shopPenaltiesList')
+            try {
+                const response = await fetch(`${API_BASE}/shop/penalties`)
+                const data = await response.json()
+                if (data.success && data.data.length > 0) {
+                    container.innerHTML = data.data.map(penalty => `
+                        <div class="item-card" style="border-left: 3px solid #ff4444; display: flex; flex-direction: column;">
+                            ${penalty.image ? `<img src="${penalty.image}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;">` : ''}
+                            <div class="item-info" style="flex: 1;">
+                                <div class="item-name" style="color: #ff4444; font-size: 16px; font-weight: 600;">${penalty.name}</div>
+                                <div class="item-desc" style="color: #ff6b6b; font-size: 14px; margin: 4px 0;">消除价格: ¥${penalty.price}</div>
+                                ${penalty.description ? `<div class="item-desc" style="font-size: 12px; color: #aaa; margin-bottom: 8px;">${penalty.description}</div>` : ''}
+                            </div>
+                            <div class="item-actions" style="display: flex; align-items: center; gap: 6px; margin-top: auto;">
+                                <input type="number" id="penaltyQty_${penalty.id}" value="1" min="1" max="99" style="width: 50px; background: #1a1a2e; color: #fff; border: 1px solid #333; padding: 6px; border-radius: 4px; text-align: center;">
+                                <button id="btnPay_${penalty.id}" class="btn btn-danger" onclick="payPenalty(${penalty.id})" style="flex:1;">消除</button>
+                            </div>
+                        </div>
+                    `).join('')
+                } else {
+                    container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无上架惩罚</p>'
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ff4444; text-align: center; padding: 20px;">加载失败</p>'
+            }
+        }
+
+        async function payPenalty(penaltyId) {
+            const token = localStorage.getItem('token')
+            if (!token) { alert('请先登录'); return }
+            const btn = document.getElementById(`btnPay_${penaltyId}`)
+            if (!btn || btn.disabled) return
+            btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'
+            const qtyInput = document.getElementById(`penaltyQty_${penaltyId}`)
+            const quantity = parseInt(qtyInput ? qtyInput.value : 1) || 1
+            try {
+                const response = await fetch(`${API_BASE}/shop/pay-penalty`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ penaltyId, quantity })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(data.message)
+                    const user = JSON.parse(localStorage.getItem('user') || '{}')
+                    user.balance = data.balance
+                    localStorage.setItem('user', JSON.stringify(user))
+                    updateBalance(data.balance)
+                    loadShopPenalties()
+                } else {
+                    alert(data.error)
+                    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+                btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'
+            }
+        }
+
+        async function loadShopProducts() {
+            const container = document.getElementById('shopProductsList')
+            try {
+                const response = await fetch(`${API_BASE}/products/list`)
+                const data = await response.json()
+                if (data.success && data.data.length > 0) {
+                    container.innerHTML = data.data.map(product => `
+                        <div class="product-card" style="display: flex; flex-direction: column;">
+                            ${product.image ? `<img src="${product.image}" alt="${product.name}" style="width: 100%; height: 150px; object-fit: cover; border-radius: 6px; margin-bottom: 10px;">` : '<div style="height: 150px; background: #1a1a2e; display: flex; align-items: center; justify-content: center; font-size: 48px; border-radius: 6px; margin-bottom: 10px;">📦</div>'}
+                            <div class="product-info" style="flex: 1;">
+                                <div class="product-name" style="font-size: 16px; font-weight: 600;">${product.name}</div>
+                                <div class="product-price" style="color: #ffd700; font-size: 14px; margin: 4px 0;">¥${product.price}</div>
+                                ${product.description ? `<div class="product-desc" style="font-size: 12px; color: #aaa; margin-bottom: 8px;">${product.description}</div>` : ''}
+                            </div>
+                            <button id="btnPurchase_${product.id}" class="btn btn-primary purchase-btn" onclick="purchaseProduct(${product.id})" style="margin-top: auto; width: 100%;">立即购买</button>
+                        </div>
+                    `).join('')
+                } else {
+                    container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无上架商品</p>'
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ff4444; text-align: center; padding: 20px;">加载失败</p>'
+            }
+        }
+
+        async function purchaseProduct(productId) {
+            const token = localStorage.getItem('token')
+            if (!token) { alert('请先登录'); return }
+            const btn = document.getElementById(`btnPurchase_${productId}`)
+            if (!btn || btn.disabled) return
+            btn.disabled = true; btn.style.opacity = '0.5'; btn.style.cursor = 'not-allowed'
+            try {
+                const response = await fetch(`${API_BASE}/products/purchase`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ productId })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(data.message)
+                    const user = JSON.parse(localStorage.getItem('user') || '{}')
+                    user.balance = data.balance
+                    localStorage.setItem('user', JSON.stringify(user))
+                    updateBalance(data.balance)
+                    loadShopProducts()
+                    loadHomePage()
+                } else {
+                    alert(data.error)
+                    btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'
+                }
+            } catch (error) {
+                alert('购买失败：' + error.message)
+                btn.disabled = false; btn.style.opacity = '1'; btn.style.cursor = 'pointer'
+            }
+        }
+
+        // ==================== 银行/贷款页面 ====================
+        async function loadBank() {
+            // 先检查银行状态
+            try {
+                const statusRes = await fetch(`${API_BASE}/bank/status`)
+                const statusData = await statusRes.json()
+                const bankOpen = statusData.bank_open === true
+                updateBankStatusUI(bankOpen)
+            } catch (e) {
+                console.error('Failed to check bank status:', e)
+            }
+
+            await Promise.all([
+                loadLoanConfig(),
+                loadMyLoans()
+            ])
+            // 更新银行页统计
+            try {
+                const token = localStorage.getItem('token')
+                const response = await fetch(`${API_BASE}/user/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data) {
+                    document.getElementById('bankBalanceStat').textContent = `¥${data.balance || 0}`
+                }
+            } catch (e) {}
+        }
+
+        function updateBankStatusUI(bankOpen) {
+            const banner = document.getElementById('bankStatusBanner')
+            const bankPage = document.getElementById('bank')
+            if (!bankOpen) {
+                banner.style.display = 'block'
+                banner.style.background = 'rgba(255, 68, 68, 0.15)'
+                banner.style.border = '1px solid #ff4444'
+                banner.style.color = '#ff4444'
+                banner.textContent = '🔒 银行目前关闭中，无法申请贷款'
+                bankPage.classList.add('bank-disabled')
+            } else {
+                banner.style.display = 'block'
+                banner.style.background = 'rgba(40, 167, 69, 0.15)'
+                banner.style.border = '1px solid #28a745'
+                banner.style.color = '#28a745'
+                banner.textContent = '✅ 银行正常开放'
+                bankPage.classList.remove('bank-disabled')
+            }
+            // 更新管理员面板的开关
+            const toggle = document.getElementById('bankToggle')
+            const statusLabel = document.getElementById('bankToggleStatus')
+            if (toggle) {
+                toggle.checked = bankOpen
+                statusLabel.textContent = bankOpen ? '🟢 营业中' : '🔴 已关闭'
+                statusLabel.style.color = bankOpen ? '#28a745' : '#ff4444'
+            }
+        }
+
+        async function toggleBankStatus() {
+            const toggle = document.getElementById('bankToggle')
+            const token = localStorage.getItem('token')
+            const bankOpen = toggle.checked
+            try {
+                const res = await fetch(`${API_BASE}/admin/bank/toggle`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ bank_open: bankOpen })
+                })
+                const data = await res.json()
+                if (data.success) {
+                    showAutoIndicator(bankOpen ? '银行已开启' : '银行已关闭')
+                    updateBankStatusUI(data.bank_open)
+                } else {
+                    alert(data.error)
+                    toggle.checked = !bankOpen
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+                toggle.checked = !bankOpen
+            }
+        }
+
+        async function loadAdminBankStatus() {
+            try {
+                const res = await fetch(`${API_BASE}/bank/status`)
+                const data = await res.json()
+                if (data.success !== undefined) {
+                    updateBankStatusUI(data.bank_open === true)
+                }
+            } catch (e) {
+                console.error('Failed to load admin bank status:', e)
+            }
+        }
+
+        async function loadLoanConfig() {
+            try {
+                const response = await fetch(`${API_BASE}/loans/config`)
+                const data = await response.json()
+                if (data.success && data.data) {
+                    const cfg = data.data
+                    // 银行页面显示
+                    const displayDiv = document.getElementById('loanConfigDisplay')
+                    if (displayDiv) {
+                        displayDiv.innerHTML = `
+                            <div style="background: #16213e; padding: 12px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 24px; color: #ffd700;">¥${cfg.max_amount || 0}</div>
+                                <div style="font-size: 12px; color: #aaa;">贷款上限</div>
+                            </div>
+                            <div style="background: #16213e; padding: 12px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 24px; color: #4fc3f7;">${cfg.max_term_days || 0}天</div>
+                                <div style="font-size: 12px; color: #aaa;">最长期限</div>
+                            </div>
+                            <div style="background: #16213e; padding: 12px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 24px; color: #81c784;">${cfg.interest_rate || 0}%</div>
+                                <div style="font-size: 12px; color: #aaa;">利率</div>
+                            </div>
+                            <div style="background: #16213e; padding: 12px; border-radius: 6px; text-align: center;">
+                                <div style="font-size: 24px; color: #ff8a65;">${cfg.daily_penalty_rate || 0}%</div>
+                                <div style="font-size: 12px; color: #aaa;">逾期日罚息</div>
+                            </div>
+                        `
+                    }
+                    // 管理后台表单填充
+                    if (document.getElementById('loanCfgMaxAmount')) {
+                        document.getElementById('loanCfgMaxAmount').value = cfg.max_amount || ''
+                        document.getElementById('loanCfgMaxTerm').value = cfg.max_term_days || ''
+                        document.getElementById('loanCfgInterestRate').value = cfg.interest_rate || ''
+                        document.getElementById('loanCfgDailyPenalty').value = cfg.daily_penalty_rate || ''
+                    }
+                    return cfg
+                }
+            } catch (error) {
+                console.error('Failed to load loan config:', error)
+            }
+            return null
+        }
+
+        async function saveLoanConfig() {
+            const btn = document.getElementById('btnSaveLoanConfig')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const max_amount = parseFloat(document.getElementById('loanCfgMaxAmount').value)
+            const max_term_days = parseInt(document.getElementById('loanCfgMaxTerm').value)
+            const interest_rate = parseFloat(document.getElementById('loanCfgInterestRate').value)
+            const daily_penalty_rate = parseFloat(document.getElementById('loanCfgDailyPenalty').value)
+            const token = localStorage.getItem('token')
+
+            if (!max_amount || !max_term_days || isNaN(interest_rate)) {
+                alert('请填写完整的配置信息')
+                unlockBtn(btn); return
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/loans/config`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ max_amount, max_term_days, interest_rate, daily_penalty_rate: daily_penalty_rate || 0 })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator('贷款配置已更新')
+                    loadLoanConfig()
+                } else {
+                    alert(data.error)
+                }
+            } catch (error) {
+                alert('保存失败：' + error.message)
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        async function applyLoan() {
+            const btn = document.getElementById('btnApplyLoan')
+            if (btn.disabled) return
+            lockBtn(btn)
+            const token = localStorage.getItem('token')
+            if (!token) { alert('请先登录'); unlockBtn(btn); return }
+
+            // 本地检查银行状态
+            const bankPage = document.getElementById('bank')
+            if (bankPage.classList.contains('bank-disabled')) {
+                document.getElementById('loanResult').innerHTML = '<p style="color: #ff4444;">❌ 银行目前已关闭，无法申请贷款</p>'
+                unlockBtn(btn); return
+            }
+
+            const amount = parseFloat(document.getElementById('loanAmount').value)
+            const termDays = parseInt(document.getElementById('loanTermDays').value)
+            const resultDiv = document.getElementById('loanResult')
+
+            if (!amount || amount <= 0) {
+                resultDiv.innerHTML = '<p style="color: #ff4444;">请输入有效的贷款金额</p>'
+                unlockBtn(btn); return
+            }
+            if (!termDays || termDays <= 0) {
+                resultDiv.innerHTML = '<p style="color: #ff4444;">请输入有效的贷款期限</p>'
+                unlockBtn(btn); return
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/loans/apply`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ amount, termDays })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    resultDiv.innerHTML = `<p style="color: #28a745;">✅ ${data.message}，到账 ¥${amount}</p>`
+                    document.getElementById('loanAmount').value = ''
+                    document.getElementById('loanTermDays').value = ''
+                    updateBalance(data.balance)
+                    loadMyLoans()
+                    loadBank()
+                } else {
+                    resultDiv.innerHTML = `<p style="color: #ff4444;">❌ ${data.error}</p>`
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `<p style="color: #ff4444;">❌ 申请失败：${error.message}</p>`
+            } finally {
+                unlockBtn(btn)
+            }
+        }
+
+        async function loadMyLoans() {
+            const token = localStorage.getItem('token')
+            if (!token) return
+            const container = document.getElementById('myLoansList')
+            try {
+                const response = await fetch(`${API_BASE}/loans/list`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    const loans = data.data || []
+                    // 更新统计
+                    const activeLoans = loans.filter(l => l.status === 'active')
+                    const remainingTotal = activeLoans.reduce((sum, l) => sum + l.remaining, 0)
+                    document.getElementById('bankTotalLoans').textContent = loans.length
+                    document.getElementById('bankActiveLoans').textContent = activeLoans.length
+                    document.getElementById('bankRemainingDebt').textContent = `¥${remainingTotal}`
+
+                    if (loans.length === 0) {
+                        container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无贷款记录</p>'
+                        return
+                    }
+
+                    container.innerHTML = `<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 14px;">
+                        <thead>
+                            <tr style="background: #1a1a2e;">
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">金额</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">利率</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">期限</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">应还总额</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">剩余欠款</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">到期日</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">状态</th>
+                                <th style="padding: 10px 8px; text-align: left; color: #aaa;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${loans.map(loan => {
+                                const dueDate = new Date(loan.due_date)
+                                const now = new Date()
+                                const isOverdue = now > dueDate && loan.status === 'active'
+                                const statusText = loan.status === 'active' ? (isOverdue ? '⚠️ 逾期' : '✅ 进行中') : (loan.status === 'repaid' ? '✅ 已还清' : '📋 已结清')
+                                const statusColor = loan.status === 'active' ? (isOverdue ? '#ff4444' : '#4fc3f7') : '#81c784'
+                                return `<tr style="border-bottom: 1px solid #333;">
+                                    <td style="padding: 10px 8px;">¥${loan.amount}</td>
+                                    <td style="padding: 10px 8px;">${loan.interest_rate}%</td>
+                                    <td style="padding: 10px 8px;">${loan.term_days}天</td>
+                                    <td style="padding: 10px 8px; color: #ffd700;">¥${loan.total_repay}</td>
+                                    <td style="padding: 10px 8px; color: ${loan.status === 'active' ? '#ff6b6b' : '#81c784'};">¥${loan.remaining}</td>
+                                    <td style="padding: 10px 8px;">${loan.due_date}</td>
+                                    <td style="padding: 10px 8px; color: ${statusColor};">${statusText}</td>
+                                    <td style="padding: 10px 8px;">
+                                        ${loan.status === 'active' ? `
+                                            <button class="btn btn-primary" style="padding: 4px 10px; font-size: 12px;" onclick="repayLoan(${loan.id})">还款</button>
+                                            <button class="btn btn-success" style="padding: 4px 10px; font-size: 12px;" onclick="repayFullLoan(${loan.id})">还清</button>
+                                        ` : ''}
+                                    </td>
+                                </tr>`
+                            }).join('')}
+                        </tbody>
+                    </table></div>`
+                }
+            } catch (error) {
+                container.innerHTML = '<p style="color: #ff4444; text-align: center; padding: 20px;">加载失败</p>'
+            }
+        }
+
+        async function repayLoan(loanId) {
+            const token = localStorage.getItem('token')
+            if (!token) return
+            const amount = prompt('请输入还款金额：')
+            if (!amount || isNaN(amount) || parseFloat(amount) <= 0) return
+            try {
+                const response = await fetch(`${API_BASE}/loans/repay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ loanId, amount: parseFloat(amount) })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(data.message)
+                    updateBalance(data.balance)
+                    loadMyLoans()
+                    loadBank()
+                } else {
+                    alert(data.error)
+                }
+            } catch (error) {
+                alert('还款失败：' + error.message)
+            }
+        }
+
+        async function repayFullLoan(loanId) {
+            const token = localStorage.getItem('token')
+            if (!token) return
+            if (!confirm('确定要一次性还清这笔贷款吗？')) return
+            try {
+                const response = await fetch(`${API_BASE}/loans/repay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ loanId })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(data.message)
+                    updateBalance(data.balance)
+                    loadMyLoans()
+                    loadBank()
+                } else {
+                    alert(data.error)
+                }
+            } catch (error) {
+                alert('还款失败：' + error.message)
+            }
+        }
+
+        // ==================== 管理员 - 贷款管理 ====================
+        async function loadAdminLoans() {
+            const token = localStorage.getItem('token')
+            const container = document.getElementById('adminLoansList')
+            if (!container) return
+            try {
+                const response = await fetch(`${API_BASE}/loans/all`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                })
+                const data = await response.json()
+                if (data.success) {
+                    const loans = data.data || []
+                    if (loans.length === 0) {
+                        container.innerHTML = '<p style="color: #aaa; text-align: center; padding: 20px;">暂无贷款记录</p>'
+                        return
+                    }
+                    container.innerHTML = `<div style="overflow-x: auto;"><table style="width: 100%; border-collapse: collapse; font-size: 13px;">
+                        <thead>
+                            <tr style="background: #1a1a2e;">
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">用户</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">金额</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">利率</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">应还</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">剩余</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">到期日</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">状态</th>
+                                <th style="padding: 8px 6px; text-align: left; color: #aaa;">操作</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${loans.map(loan => {
+                                const statusText = loan.status === 'active' ? '进行中' : (loan.status === 'repaid' ? '已还清' : '已结清')
+                                return `<tr style="border-bottom: 1px solid #333;">
+                                    <td style="padding: 8px 6px; color: #4fc3f7;">${loan.username}</td>
+                                    <td style="padding: 8px 6px;">¥${loan.amount}</td>
+                                    <td style="padding: 8px 6px;">${loan.interest_rate}%</td>
+                                    <td style="padding: 8px 6px; color: #ffd700;">¥${loan.total_repay}</td>
+                                    <td style="padding: 8px 6px; color: ${loan.status === 'active' ? '#ff6b6b' : '#81c784'};">¥${loan.remaining}</td>
+                                    <td style="padding: 8px 6px;">${loan.due_date}</td>
+                                    <td style="padding: 8px 6px; color: ${loan.status === 'active' ? '#ffd700' : '#81c784'};">${statusText}</td>
+                                    <td style="padding: 8px 6px;">
+                                        ${loan.status === 'active' ? `<button class="btn btn-warning" style="padding: 2px 8px; font-size: 11px;" onclick="settleLoan(${loan.id})">结清</button>` : '-'}
+                                    </td>
+                                </tr>`
+                            }).join('')}
+                        </tbody>
+                    </table></div>`
+                }
+            } catch (error) {
+                console.error('Failed to load admin loans:', error)
+            }
+        }
+
+        async function settleLoan(loanId) {
+            const token = localStorage.getItem('token')
+            if (!confirm('确定要强制结清这笔贷款吗？')) return
+            try {
+                const response = await fetch(`${API_BASE}/loans/settle`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                    body: JSON.stringify({ loanId })
+                })
+                const data = await response.json()
+                if (data.success) {
+                    showAutoIndicator(data.message)
+                    loadAdminLoans()
+                } else {
+                    alert(data.error)
+                }
+            } catch (error) {
+                alert('操作失败：' + error.message)
+            }
+        }
+
+        function updateBalance(newBalance) {
+            document.querySelectorAll('[id$="BalanceStat"], [id="userBalance"]').forEach(el => {
+                if (el.id === 'userBalance') {
+                    el.textContent = `余额: ¥${newBalance || 0}`
+                } else {
+                    el.textContent = `¥${newBalance || 0}`
+                }
+            })
+        }
+
+        checkAuth()
+    </script>
+</body>
+</html>

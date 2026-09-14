@@ -1,0 +1,8 @@
+name = "game-api"
+main = "src/index.js"
+compatibility_date = "2024-01-01"
+
+[[d1_databases]]
+binding = "game_database"
+database_name = "game-database"
+database_id = "8364f298-e899-4b13-9d3b-c99a2fd99a02"
