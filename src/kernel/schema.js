@@ -251,6 +251,21 @@ async function initKernelSchema(DB) {
       created_by TEXT DEFAULT '',
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
+
+    // 步骤6 配置提审/发布
+    `CREATE TABLE IF NOT EXISTS config_reviews (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      scope TEXT NOT NULL,
+      payload TEXT NOT NULL,
+      note TEXT DEFAULT '',
+      status TEXT NOT NULL DEFAULT 'pending',
+      rtp_result TEXT DEFAULT '',
+      created_by TEXT NOT NULL DEFAULT '',
+      reviewed_by TEXT DEFAULT '',
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      reviewed_at DATETIME
+    )`,
+    'CREATE INDEX IF NOT EXISTS idx_config_reviews_scope ON config_reviews(scope, status)',
   ]
   // ALTER 可能因列已存在而失败，静默忽略（D1 prepare 为惰性，本处同时兼容急切校验的本地运行时）
   try {

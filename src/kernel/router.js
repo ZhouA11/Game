@@ -294,12 +294,60 @@ async function handleAdminKernel(request, DB, path) {
   if (path[0] === 'audit' && method === 'GET') {
     const sp = new URL(request.url).searchParams
     const limit = toInt(sp.get('limit'), 50, 1, 200)
-    const rows = await DB.prepare('SELECT * FROM config_audit ORDER BY id DESC LIMIT ?').bind(limit).all()
+    const scope = sp.get('scope')
+    const rows = scope
+      ? await DB.prepare('SELECT * FROM config_audit WHERE scope = ? ORDER BY id DESC LIMIT ?').bind(scope, limit).all()
+      : await DB.prepare('SELECT * FROM config_audit ORDER BY id DESC LIMIT ?').bind(limit).all()
     return okResponse({ audit: rows.results || [] })
   }
   if (path[0] === 'config-versions' && method === 'GET') {
     const rows = await DB.prepare('SELECT id, scope, version, status, created_by, created_at FROM config_versions ORDER BY id DESC LIMIT 50').all()
     return okResponse({ versions: rows.results || [] })
+  }
+
+  // === 步骤6 运营后台 ===
+  const { getDashboard, listReviews, submitReviewOp, stagingReviewOp, publishReviewOp, rollbackReviewOp, listTemplateRefs, listRewardBags, deliverRewardOp } = await import('../games/review.js')
+  const { computeGameRTP } = await import('../games/rtp.js')
+
+  // T6.1 数据看板
+  if (path[0] === 'dashboard' && method === 'GET') {
+    return okResponse(await getDashboard(DB))
+  }
+  // T6.9 返还率预览（payload 可选：保存即自动重算）
+  if (path[0] === 'rtp' && method === 'GET' || path[0] === 'rtp' && method === 'POST') {
+    const body = method === 'POST' ? await readJson(request) : {}
+    const game = body.game || new URL(request.url).searchParams.get('game')
+    return okResponse(await computeGameRTP(DB, game || 'grab', body.payload || null))
+  }
+  // T6.10 提审 / 预发 / 发布 / 回滚
+  if (path[0] === 'reviews' && method === 'GET') {
+    const sp = new URL(request.url).searchParams
+    return okResponse({ reviews: await listReviews(DB, { scope: sp.get('scope'), status: sp.get('status'), limit: sp.get('limit') }) })
+  }
+  if (path[0] === 'reviews' && method === 'POST') {
+    const body = await readJson(request)
+    return okResponse(await submitReviewOp(DB, {
+      scope: body.scope, payload: body.payload, note: body.note, operator: admin.username,
+    }))
+  }
+  if (path[0] === 'reviews' && path[2] && method === 'POST') {
+    const id = toInt(path[1], 0, 1, 1e12)
+    const act = { staging: stagingReviewOp, publish: publishReviewOp, rollback: rollbackReviewOp }[path[2]]
+    if (!act) throw new KernelError('NOT_FOUND', '未知操作', 404)
+    return okResponse(await act(DB, { id, operator: admin.username }))
+  }
+  // T6.3 引用面 / 奖励发货
+  if (path[0] === 'reward-refs' && path[2] && method === 'GET') {
+    return okResponse({ refs: await listTemplateRefs(DB, path[1], toInt(path[2], 0, 1, 1e12)) })
+  }
+  if (path[0] === 'reward-bags' && method === 'GET') {
+    return okResponse({ bags: await listRewardBags(DB, new URL(request.url).searchParams.get('username')) })
+  }
+  if (path[0] === 'reward-bags' && path[1] === 'deliver' && method === 'POST') {
+    const body = await readJson(request)
+    return okResponse(await deliverRewardOp(DB, {
+      username: String(body.username || ''), rewardId: toInt(body.reward_id, 0, 1, 1e12), operator: admin.username,
+    }))
   }
 
   // 内核自检/演示端点：模拟一次结算链挂载（仅用于联通验证，正式游戏在步骤2~4接入）

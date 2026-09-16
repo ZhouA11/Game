@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>运营后台 - 11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/grab.css?v=1">
+    <link rel="stylesheet" href="css/panel.css?v=1">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="games.html">游戏界面</a>
+                    <a class="nav-btn" href="mall.html">鎏金商城</a>
+                    <a class="nav-btn" href="panel.html">个人面板</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">管理员</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="casino-banner">
+                <h1>✦ 运营后台 · OPS CONSOLE ✦</h1>
+                <div class="sub">改概率 → 自动算返还率 → 提审 → 预发验证 → 全量发布 → 可回滚</div>
+            </div>
+
+            <div class="panel-tabs">
+                <button class="panel-tab active" data-tab="dash">📊 数据看板</button>
+                <button class="panel-tab" data-tab="shop">🛒 商品管理</button>
+                <button class="panel-tab" data-tab="reward">🎟️ 奖励管理</button>
+                <button class="panel-tab" data-tab="penalty">😈 惩罚管理</button>
+                <button class="panel-tab" data-tab="adjust">🛠️ 玩家调整</button>
+                <button class="panel-tab" data-tab="rtp">🎲 概率与返还率</button>
+                <button class="panel-tab" data-tab="rarity">💠 稀有度配置</button>
+                <button class="panel-tab" data-tab="audit">📜 审计日志</button>
+            </div>
+
+            <!-- 看板 -->
+            <div id="tab-dash" class="tab-page">
+                <div class="overview-grid">
+                    <div class="overview-card"><div class="o-num" id="dGrab">-</div><div class="o-label">抓娃娃返还率（80~90%）</div></div>
+                    <div class="overview-card"><div class="o-num" id="dSlot">-</div><div class="o-label">老虎机 RTP（93~97%）</div></div>
+                    <div class="overview-card"><div class="o-num" id="dPending">-</div><div class="o-label">待审批调整</div></div>
+                    <div class="overview-card"><div class="o-num" id="dSkip">-</div><div class="o-label">0库存跳过次数</div></div>
+                </div>
+                <div class="panel-card" style="margin-top:16px"><div class="panel-title">😈 惩罚道具 Spank 累计与减免率</div><div id="dPenalties"></div></div>
+                <div class="panel-card"><div class="panel-title">⚠️ 奖励库存告警</div><div id="dStock"></div></div>
+                <div class="panel-card"><div class="panel-title">🧩 碎片</div><div class="stat-line"><span>合成次数</span><b id="dSynth">-</b></div><div class="stat-line"><span>当前持有碎片</span><b id="dFrag">-</b></div></div>
+                <div class="panel-card"><div class="panel-title">🛠️ 后台人工调整量（按操作人/类型）</div><div id="dAdjust"></div></div>
+            </div>
+
+            <!-- 商品 -->
+            <div id="tab-shop" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">🛒 商品管理 <small style="font-size:12px;color:rgba(255,236,176,.6)">只允许引用游戏类/惩罚减免类道具（服务端硬校验）</small></div>
+                    <div id="shopList"></div>
+                    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:10px">
+                        <input id="npItem" placeholder="道具ID" class="mini-input">
+                        <select id="npCurrency" class="mini-input"><option value="coin">金币</option><option value="activity">活跃值</option></select>
+                        <input id="npPrice" placeholder="价格" class="mini-input">
+                        <input id="npLimit" placeholder="限购/日(空=默认)" class="mini-input">
+                        <button class="mini-btn primary" id="npCreate">上架商品</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 奖励 -->
+            <div id="tab-reward" class="tab-page" style="display:none">
+                <div class="panel-card"><div class="panel-title">🎟️ 奖励模板（库存即配货；编辑走下方/审计留痕）</div><div id="rewardList"></div></div>
+                <div class="panel-card"><div class="panel-title">📦 玩家奖励背包与发货</div>
+                    <div style="display:flex; gap:8px; margin-bottom:10px">
+                        <input id="bagUser" placeholder="用户名（空=全部）" class="mini-input" style="flex:1">
+                        <button class="mini-btn" id="bagRefresh">查询</button>
+                    </div>
+                    <div id="bagList"></div>
+                </div>
+            </div>
+
+            <!-- 惩罚 -->
+            <div id="tab-penalty" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">😈 惩罚道具库 <small style="font-size:12px;color:rgba(255,236,176,.6)">Spank 数量与稀有度无关（G11）· 减免单位折算价：<b id="unitPrice">-</b></small></div>
+                    <div id="penList"></div>
+                    <div style="display:grid; grid-template-columns:repeat(5,1fr); gap:8px; margin-top:10px">
+                        <input id="npName" placeholder="名称" class="mini-input">
+                        <input id="npRarity" placeholder="稀有度1~4" class="mini-input">
+                        <input id="npMin" placeholder="Spank下限" class="mini-input">
+                        <input id="npMax" placeholder="Spank上限" class="mini-input">
+                        <button class="mini-btn primary" id="penCreate">新建惩罚道具</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 调整 -->
+            <div id="tab-adjust" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">🛠️ 玩家数据人工调整 <small style="font-size:12px;color:rgba(255,236,176,.6)">原因必填 · 超阈值需审批 · 全部落审计</small></div>
+                    <div style="display:grid; grid-template-columns:repeat(6,1fr); gap:8px">
+                        <input id="adjUser" placeholder="玩家用户名" class="mini-input">
+                        <select id="adjType" class="mini-input"><option value="coin">金币</option><option value="activity">活跃值</option><option value="reward">奖励</option><option value="item">道具</option><option value="penalty">Spank</option></select>
+                        <input id="adjTarget" placeholder="模板ID(按类型)" class="mini-input">
+                        <input id="adjDelta" placeholder="增减量" class="mini-input">
+                        <input id="adjReason" placeholder="原因（必填）" class="mini-input">
+                        <button class="mini-btn primary" id="adjSubmit">提交调整</button>
+                    </div>
+                    <div class="stat-line" style="margin-top:10px"><span>待审批</span><b id="adjPending">-</b></div>
+                    <div id="adjList"></div>
+                </div>
+            </div>
+
+            <!-- 概率与返还率 -->
+            <div id="tab-rtp" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">🎲 概率配置与返还率（保存即自动重算 · 越界禁止提审）</div>
+                    <div style="display:flex; gap:8px; margin-bottom:10px">
+                        <select id="rtpGame" class="mini-input"><option value="grab">抓娃娃（解析式）</option><option value="slot">老虎机（蒙特卡洛10万次）</option></select>
+                        <button class="mini-btn" id="rtpCalc">重算返还率</button>
+                    </div>
+                    <div id="rtpResult"></div>
+                </div>
+                <div class="panel-card">
+                    <div class="panel-title">📮 提审记录（预发验证 → 全量发布 → 可回滚）</div>
+                    <div id="reviewList"></div>
+                </div>
+            </div>
+
+            <!-- 稀有度 -->
+            <div id="tab-rarity" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">💠 稀有度四级参数（等级/名称不可改 · 提审发布后生效）</div>
+                    <div id="rarityList"></div>
+                </div>
+            </div>
+
+            <!-- 审计 -->
+            <div id="tab-audit" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">📜 审计日志（配置变更 + 玩家调整）</div>
+                    <div id="auditList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="grabToast" class="grab-toast"></div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/console.js?v=1"></script>
+    <script>initAppPage(loadConsole)</script>
+</body>
+</html>

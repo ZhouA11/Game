@@ -106,9 +106,16 @@ export async function handleGamesRequest(request, DB, path) {
 async function handleMall(request, DB, path) {
   const method = request.method
 
-  // 管理端（上架/改价；步骤6接UI）
+  // 管理端（上架/改价/列表；步骤6后台接UI）
   if (path[0] === 'admin' && path[1] === 'products') {
     const admin = await requireAdmin(request, DB)
+    if (method === 'GET') {
+      const rows = await DB.prepare(
+        `SELECT p.*, t.name, t.rarity, t.category, t.action, t.action_value FROM shop_products p
+         JOIN item_templates t ON t.id = p.item_id ORDER BY p.sort, p.id`
+      ).all()
+      return okResponse({ products: rows.results || [] })
+    }
     if (method === 'POST') {
       const body = await readJson(request)
       return okResponse(await createProductOp(DB, body, admin.username))
