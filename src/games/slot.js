@@ -1,4 +1,4 @@
-﻿// 步骤3 · 老虎机（T3.1~T3.15）
+// 步骤3 · 老虎机（T3.1~T3.15）
 // 5轴×3行；一次 spin 在服务端完成全部爆裂模拟并返回 steps[]，客户端只回放；
 // Nudge/追猴/转轮三个后置端点的分支全部在 spin 时预生成落库，选择后只揭示，不重 roll；
 // 复用步骤1内核：统一账本 / grantFragmentStmts / grantRewardStmts / 幂等包装；
@@ -11,6 +11,7 @@ import { getParam } from '../kernel/templates.js'
 import { grantFragmentStmts } from '../kernel/fragments.js'
 import { grantRewardStmts } from '../kernel/backpack.js'
 import { mulberry32 } from './rng.js'
+import { getPoolParams, getOrCreatePool, poolDepositStmts, poolPayoutStmts, getPoolView } from './pool.js'
 export const MACHINE = 'slot-1'
 const STRIP_LEN = 100
 export const MULT_LADDER = [1, 2, 3, 5, 10]      // T3.2 倍率 ×1→×2→×3→×5 封顶 ×10
@@ -82,6 +83,28 @@ async function initSlotSchema(DB) {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP
     )`,
     'CREATE INDEX IF NOT EXISTS idx_slot_pending_user ON slot_pending(username, status)',
+    // 步骤4 单人彩池（按玩家维度持久化）
+    `CREATE TABLE IF NOT EXISTS pool_state (
+      username TEXT PRIMARY KEY,
+      amount REAL NOT NULL DEFAULT 0,
+      last_payout REAL,
+      last_payout_spin INTEGER,
+      updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    `CREATE TABLE IF NOT EXISTS pool_ledger (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      username TEXT NOT NULL,
+      delta REAL NOT NULL,
+      balance_after REAL NOT NULL,
+      reason TEXT NOT NULL,
+      ref TEXT DEFAULT '',
+      idempotency_key TEXT UNIQUE,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    )`,
+    'CREATE INDEX IF NOT EXISTS idx_pool_ledger_user ON pool_ledger(username, id)',
+    `INSERT OR IGNORE INTO kernel_params (key, value, note) VALUES
+      ('pool_rate', '5', '每次付费spin按费用比例入池（%）'),
+      ('pool_seed', '5000', '新玩家彩池初始种子值（币）/ 出奖后重置值')`,
     // 种子配置（G17：步骤6后台可改）
     `INSERT OR IGNORE INTO slot_config (id, config) VALUES (1, '{
       "pays": {"cherry":[1,3,8],"lemon":[1,4,10],"bell":[3,8,20],"diamond":[5,15,45],"wild":[10,10,10]},
@@ -481,6 +504,59 @@ export async function spinOp(DB, { username, holdReel = null, idempotencyKey = n
     wheelPending = { id: prRun.meta.last_row_id, sectorCount: sectors.length }
   }
 
+  // —— 步骤4 单人彩池（T4.2 入池 / T4.4~T4.6 触发出奖，与 spin 结算同 batch） ——
+  let poolInfo = null
+  let jackpotPayout = 0
+  {
+    // T4.2 入池：仅付费 spin 按比例入池（免费转无可抽费用）
+    const { rate, seed: poolSeed } = await getPoolParams(DB)
+    let afterDeposit = null
+    if (freeType === 'paid' && rate > 0) {
+      const deposit = toMoney(actualFee * rate / 100)
+      if (deposit > 0) {
+        const { stmts: ds, after } = await poolDepositStmts(DB, {
+          username, amount: deposit, ref: `spin:${spinId}`,
+        })
+        stmts.push(...ds)
+        afterDeposit = after
+        poolInfo = { deposit }
+      }
+    }
+    // T4.4/T4.5 出奖：Jackpot 5 连 → 池额全额发放 + 重置种子 + 固定掉 1 片碎片（9:1）
+    if (sim.jackpot) {
+      // baseAfter = 入池后的池额（同 batch 内解析传递，避免读到入池前旧值）
+      if (afterDeposit === null) {
+        const pool = await getOrCreatePool(DB, username)
+        afterDeposit = pool.amount
+      }
+      const { stmts: ps, payout } = await poolPayoutStmts(DB, { username, spinId, baseAfter: afterDeposit })
+      stmts.push(...ps)
+      jackpotPayout = payout
+      stmts.push(...(await ledgerStmts(DB, {
+        username, currency: 'coin', delta: payout, reason: 'slot_jackpot',
+        refType: 'pool', refId: `spin:${spinId}`,
+        assetLog: { action: 'balance', title: '彩池大奖！', detail: `+${payout}` },
+      })).stmts)
+      // T4.8 彩池出奖固定掉 1 片碎片（华丽 : 鎏金 = 9 : 1）
+      const rarity = Math.random() * 100 < 90 ? 3 : 4
+      const recipe = await DB.prepare(
+        `SELECT r.id FROM fragment_recipes r
+         LEFT JOIN item_templates i ON r.target_type = 'item' AND i.id = r.target_id
+         WHERE r.is_active = 1 AND r.target_type = 'item' AND i.rarity = ?
+         ORDER BY r.id LIMIT 1`
+      ).bind(rarity).first()
+      if (recipe) {
+        const { stmts: fs } = await grantFragmentStmts(DB, { username, recipeId: recipe.id, quantity: 1 })
+        stmts.push(...fs)
+        fragList.push(rarity)
+      }
+      balanceAfter = Math.round((balanceAfter + payout) * 100) / 100
+      poolInfo = { ...(poolInfo || {}), payout, jackpot: true, amountAfter: poolSeed }
+    } else if (poolInfo) {
+      poolInfo.amountAfter = afterDeposit
+    }
+  }
+
   // Fever 槽与状态推进（T3.10）
   let feverSlot = state.fever_slot
   let feverActive = !!state.fever_active
@@ -545,7 +621,8 @@ export async function spinOp(DB, { username, holdReel = null, idempotencyKey = n
     fragments: fragList,
     monkey: sim.monkey ? { pendingId: monkeyPending?.id, cardCount: monkeyPending?.cardCount } : null,
     wheel: sim.wheel ? { pendingId: wheelPending?.id, sectorCount: wheelPending?.sectorCount } : null,
-    jackpot: sim.jackpot ? { hit: true, poolLedger: 'reserved-step4' } : null,   // T3.14 彩池触发预留
+    jackpot: sim.jackpot ? { hit: true, payout: jackpotPayout, poolAmountAfter: poolInfo?.amountAfter } : null,
+    pool: poolInfo,
     fever: { active: feverActive, triggered: feverJustTriggered, ended: feverEnded, slot: feverSlot, left: feverLeft },
     hold: { granted: !!sim.holdGranted, used: !!useHold },
     noWinStreak: newNoWin,
@@ -781,6 +858,7 @@ export async function getSlotState(DB, username) {
       holdActive: !!state.hold_active,
     },
     balance: u ? u.balance : 0,
+    pool: await getPoolView(DB, username),   // T4.7 彩池公示（机台与大厅实时展示）
     lastSpin: last,
     // 预生成待揭示交互：不泄露揭示结果（牌面值/落点扇区）
     pendingInteractions: (pendings.results || []).map(p => {

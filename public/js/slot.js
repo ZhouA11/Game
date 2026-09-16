@@ -91,6 +91,12 @@ function emptyGrid() {
 function renderPanel() {
   const st = slotState.state
   const cfg = slotState.config
+  // 彩池公示（T4.7）
+  if (slotState.pool) {
+    $('poolAmount').textContent = Math.round(slotState.pool.amount).toLocaleString('zh-CN')
+    $('poolRate').textContent = `${slotState.pool.rate}%（每次付费转动）`
+    $('poolLast').textContent = slotState.pool.lastPayout ? `${slotState.pool.lastPayout} 币` : '—'
+  }
   // Fever 槽
   const bar = $('feverBar')
   bar.innerHTML = ''
@@ -160,7 +166,7 @@ async function doSpin() {
     // 后置交互
     if (r.monkey) showMonkey(r.monkey.pendingId, null)
     if (r.wheel) showWheel(r.wheel.pendingId)
-    if (r.jackpot) toast('👑 JACKPOT 5连！彩池触发（敬请期待）')
+    if (r.jackpot) toast(`👑 JACKPOT 大奖！彩池 ${r.jackpot.payout} 币全额归你！`)
     if (r.fever.triggered) toast('🔥 Fever 狂热模式开启：8 次免费连转！')
     if (r.fever.ended) toast('🔥 Fever 结束，保底华丽碎片已入包')
     if (r.hold.granted) toast('🔒 获得下轮保留 1 轴的权利！')
