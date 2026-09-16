@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn active" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="assets" class="page active">
+                <div class="stats-grid" style="margin-bottom: 20px;">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="assetsBalance">¥0</div>
+                        <div class="stat-label">筹码</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">💸</div>
+                        <div class="stat-value" id="assetsDebts">0</div>
+                        <div class="stat-label">欠款数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎁</div>
+                        <div class="stat-value" id="assetsRewards">0</div>
+                        <div class="stat-label">奖励数</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">✖</div>
+                        <div class="stat-value" id="assetsPenalties">0</div>
+                        <div class="stat-label">惩罚数</div>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                    <div class="card">
+                        <div class="card-title" style="color: #ff6b6b;">欠款</div>
+                        <div id="assetDebtsList">
+                            <p style="color: #aaa; text-align: center; padding: 20px;">暂无欠款</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="color: #28a745;">奖励</div>
+                        <div id="assetRewardsList">
+                            <p style="color: #aaa; text-align: center; padding: 20px;">暂无奖励</p>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title" style="color: #ff4444;">惩罚</div>
+                        <div id="assetPenaltiesList">
+                            <p style="color: #aaa; text-align: center; padding: 20px;">暂无惩罚</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="margin-top: 20px;">
+                    <div class="card-title" style="color: #ffd700;">变更记录</div>
+                    <div id="assetLogsList">
+                        <p style="color: #aaa; text-align: center; padding: 20px;">暂无记录</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+    </div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/assets.js?v=4"></script>
+    <script>initAppPage(loadUserAssets)</script>
+</body>
+</html>

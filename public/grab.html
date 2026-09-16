@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鎏金抓娃娃 - 11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/grab.css?v=1">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn active" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="casino-banner">
+                <h1>✦ 鎏金抓娃娃 · GOLDEN CLAW ✦</h1>
+                <div class="sub">稀有度越高 · 体型越小 · 藏得越深 —— 挖掘你的运气</div>
+            </div>
+
+            <div class="grab-layout">
+                <!-- 机器 -->
+                <div class="machine-card">
+                    <div class="machine-top">
+                        <div class="machine-lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                        <div class="machine-title">GOLDEN CLAW · 鎏金一号机</div>
+                        <div class="machine-lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    </div>
+                    <div class="machine-stage-wrap">
+                        <div id="machineStage" class="machine-stage">
+                            <div id="clawArm" class="claw-arm">🪝</div>
+                        </div>
+                        <div class="zoom-bar">
+                            <span>🔍 缩放观察</span>
+                            <input type="range" id="zoomRange" min="100" max="230" value="100">
+                            <span id="zoomVal">100%</span>
+                            <button id="resetZoom">复位</button>
+                        </div>
+                    </div>
+                    <div class="machine-actions">
+                        <div class="selected-info" id="selectedInfo">点击机器中发亮的娃娃选中它</div>
+                        <button id="clawBtn" class="btn-gold" disabled>🪝 下爪（-10 金币）</button>
+                        <button id="lensBtn" class="btn-lens" disabled title="消耗一张透视镜，模糊查看内容">🔍 透视镜</button>
+                        <button id="rerollBtn" class="btn-red">♻️ 重铺</button>
+                    </div>
+                </div>
+
+                <!-- 侧栏 -->
+                <div class="side-panel">
+                    <div class="panel-card">
+                        <div class="panel-title">🌟 幸运值</div>
+                        <div class="luck-bar"><div id="luckFill"></div></div>
+                        <div class="luck-row">
+                            <span>每次下爪 +1（含失败）</span>
+                            <span><b id="luckText">0 / 100</b></span>
+                        </div>
+                        <div class="pity-hint" id="pityHint"></div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">📊 我的战况</div>
+                        <div class="rate-chips">
+                            <div class="rate-chip"><b>90%</b>L1 普通</div>
+                            <div class="rate-chip"><b>75%</b>L2 精致</div>
+                            <div class="rate-chip"><b>55%</b>L3 华丽</div>
+                            <div class="rate-chip"><b>40%</b>L4 鎏金</div>
+                        </div>
+                        <div class="stat-line"><span>今日主动重铺</span><b id="rerollCount">0 / 50</b></div>
+                        <div class="stat-line"><span>抓取连败</span><b id="failStreak">0</b></div>
+                        <div class="stat-line"><span>重铺费用</span><b id="rerollCost">30 金币 / 换机券</b></div>
+                        <div class="stat-line"><span>机内剩余</span><b id="dollsLeft">0</b></div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">🎲 概率公示</div>
+                        <div class="stat-line" style="margin-bottom:8px"><span>掉落池按娃娃稀有度分四档</span></div>
+                        <div id="poolList">加载中...</div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">📜 玩法说明</div>
+                        <div class="stat-line" style="line-height:1.8; display:block">
+                            🧸 只有<b>未被压住</b>的娃娃可以抓<br>
+                            💸 抓取失败损失费用，但有 <b>30%</b> 概率手滑带落娃娃、<b>免费开娃</b><br>
+                            😵 连续 3 次惩罚后，下一次必出奖励<br>
+                            🌟 幸运值满 100，下次重铺必刷出 <b>L3+ 娃娃</b><br>
+                            ♻️ 机内抓空可免费重铺
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 -->
+    <div id="resultMask" class="result-mask">
+        <div id="resultBox" class="result-box">
+            <div class="result-rays"></div>
+            <div id="resultEmoji" class="result-emoji">🎉</div>
+            <div id="resultTitle" class="result-title"></div>
+            <div id="resultDetail" class="result-detail"></div>
+            <div id="resultTags" class="result-tags"></div>
+            <button id="resultBtn" class="result-btn">继续挖宝</button>
+        </div>
+    </div>
+
+    <div id="grabToast" class="grab-toast"></div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/grab.js?v=1"></script>
+    <script>initAppPage(loadGrab)</script>
+</body>
+</html>

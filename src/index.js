@@ -1,13 +1,17 @@
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+  'Access-Control-Allow-Headers': 'Content-Type, Authorization, Idempotency-Key',
 }
+
+import { hashPassword, requireAuth } from './kernel/auth.js'
+import { handleKernelRequest } from './kernel/router.js'
+import { handleGamesRequest } from './games/router.js'
 
 export default {
   async fetch(request, env, ctx) {
     const url = new URL(request.url)
-    
+
     if (request.method === 'OPTIONS') {
       return new Response(null, { headers: corsHeaders })
     }
@@ -22,11 +26,13 @@ export default {
 
 async function handleAPI(request, env, ctx) {
   const url = new URL(request.url)
-  const path = url.pathname.split('/').filter(Boolean).slice(1)
+  // 解码路径段，支持中文用户名（url.pathname 返回百分号编码）
+  const path = url.pathname.split('/').filter(Boolean).slice(1).map(s => {
+    try { return decodeURIComponent(s) } catch (e) { return s }
+  })
   const DB = env.game_database
 
-  await ensureDefaultAdmin(DB)
-  await ensureTables(DB)
+  await ensureSchemaOnce(DB)
 
   try {
     // 测试端点
@@ -149,6 +155,7 @@ async function handleAPI(request, env, ctx) {
     if (path[0] === 'admin' && path[1] === 'users') {
       if (request.method === 'GET') return handleGetUsers(DB)
       if (request.method === 'DELETE' && path[2]) return handleDeleteUser(request, DB, path[2])
+      if (request.method === 'PUT' && path[2]) return handleUpdateUserBalance(request, DB, path[2])
     }
     
     if (path[0] === 'admin' && path[1] === 'user' && path[2] === 'balance') {
@@ -157,6 +164,17 @@ async function handleAPI(request, env, ctx) {
     
     if (path[0] === 'admin' && path[1] === 'user' && path[2] === 'password' && path[3] === 'reset') {
       return handleResetPassword(request, DB, path[4])
+    }
+
+    // 管理员重置用户转盘次数
+    if (path[0] === 'admin' && path[1] === 'wheel' && path[2] === 'spin' && path[3] === 'reset' && request.method === 'POST') {
+      return handleAdminWheelReset(request, DB, path[4])
+    }
+
+    // 管理员按用户设置转盘次数（奖励/惩罚分开）
+    if (path[0] === 'admin' && path[1] === 'user' && path[2] === 'wheel' && path[3] === 'limits' && path[4]) {
+      if (request.method === 'GET') return handleGetUserWheelLimits(request, DB, path[4])
+      if (request.method === 'PUT' || request.method === 'POST') return handleUpdateUserWheelLimits(request, DB, path[4])
     }
     
     // === 商店系统 ===
@@ -212,6 +230,24 @@ async function handleAPI(request, env, ctx) {
       return handleSettleLoan(request, DB)
     }
 
+    // === 转盘系统 ===
+    // 获取转盘配置（所有用户可见）
+    if (path[0] === 'wheel' && path[1] === 'config' && request.method === 'GET') {
+      return handleGetWheelConfig(request, DB)
+    }
+    // 保存转盘配置（管理员）
+    if (path[0] === 'wheel' && path[1] === 'config' && request.method === 'PUT') {
+      return handleUpdateWheelConfig(request, DB)
+    }
+    // 转动转盘
+    if (path[0] === 'wheel' && path[1] === 'spin') {
+      return handleWheelSpin(request, DB)
+    }
+    // 转盘历史记录
+    if (path[0] === 'wheel' && path[1] === 'history') {
+      return handleGetWheelHistory(DB)
+    }
+
     // === 公告栏（所有用户可见） ===
     if (path[0] === 'announcements' && request.method === 'GET') {
       return handleGetAnnouncements(DB)
@@ -231,6 +267,10 @@ async function handleAPI(request, env, ctx) {
     if (path[0] === 'messages' && request.method === 'GET') {
       return handleGetMessages(DB)
     }
+    // 留言评论：发表评论（必须放在通用 POST /messages 之前，否则会被当作新留言）
+    if (path[0] === 'messages' && path[1] && path[2] === 'comments' && request.method === 'POST') {
+      return handleCreateComment(request, DB, path[1])
+    }
     if (path[0] === 'messages' && request.method === 'POST') {
       return handleCreateMessage(request, DB)
     }
@@ -238,11 +278,28 @@ async function handleAPI(request, env, ctx) {
     if (path[0] === 'admin' && path[1] === 'messages' && path[2] && request.method === 'DELETE') {
       return handleDeleteMessage(request, DB, path[2])
     }
+    // 留言评论：删除评论（作者本人或管理员）
+    if (path[0] === 'comments' && path[1] && request.method === 'DELETE') {
+      return handleDeleteComment(request, DB, path[1])
+    }
 
     // === 用户自己的资产信息 ===
     if (path[0] === 'user' && path[1] === 'assets') {
       return handleGetUserAssets(request, DB)
     }
+
+    // 我的资产变更记录
+    if (path[0] === 'user' && path[1] === 'asset-logs') {
+      return handleGetAssetLogs(request, DB)
+    }
+
+    // === 互通内核（步骤1：内容数据模型 + 结算内核 + 通用事务） ===
+    const kernelResponse = await handleKernelRequest(request, DB, path)
+    if (kernelResponse) return kernelResponse
+
+    // === 小游戏（步骤2：抓娃娃） ===
+    const gamesResponse = await handleGamesRequest(request, DB, path)
+    if (gamesResponse) return gamesResponse
 
     return new Response(JSON.stringify({ error: 'Not Found' }), {
       status: 404,
@@ -257,45 +314,59 @@ async function handleAPI(request, env, ctx) {
   }
 }
 
-async function hashPassword(password) {
-  const encoder = new TextEncoder()
-  const data = encoder.encode(password)
-  const hashBuffer = await crypto.subtle.digest('SHA-256', data)
-  const hashArray = Array.from(new Uint8Array(hashBuffer))
-  return hashArray.map(b => b.toString(16).padStart(2, '0')).join('')
-}
+// hashPassword / authenticate 已迁移至 src/kernel/auth.js（供内核路由与旧路由共用）
 
-async function ensureDefaultAdmin(DB) {
-  try {
-    const existing = await DB.prepare('SELECT id FROM users WHERE username = ?').bind('zhou').first()
-    if (!existing) {
-      const hashedPassword = await hashPassword('Asd123**')
-      await DB.prepare(
-        'INSERT INTO users (username, password, role, balance) VALUES (?, ?, ?, ?)'
-      ).bind('zhou', hashedPassword, 'admin', 999999).run()
-    }
-  } catch (error) {
-    console.error('Failed to ensure default admin:', error)
-    // 不抛出错误，允许其他 API 继续工作
+// Schema 初始化：每个 Worker 实例只执行一次（此前每个请求都执行 25+ 条 D1 语句，导致接口延迟 2~4s）
+let schemaInitPromise = null
+function ensureSchemaOnce(DB) {
+  if (!schemaInitPromise) {
+    schemaInitPromise = initSchema(DB).catch(error => {
+      console.error('Failed to ensure schema:', error)
+      schemaInitPromise = null // 失败后允许下次请求重试
+    })
   }
+  return schemaInitPromise
 }
 
-async function ensureTables(DB) {
-  try {
+async function initSchema(DB) {
+  // 建表语句用 batch 一次往返执行
+  const ddl = [
+    'CREATE TABLE IF NOT EXISTS announcements (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, content TEXT, image TEXT, created_by TEXT, is_pinned INTEGER DEFAULT 0, is_displayed INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)',
+    'CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, content TEXT NOT NULL, image TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)',
+    'CREATE TABLE IF NOT EXISTS message_comments (id INTEGER PRIMARY KEY AUTOINCREMENT, message_id INTEGER NOT NULL, username TEXT NOT NULL, content TEXT NOT NULL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)',
+    "CREATE TABLE IF NOT EXISTS wheel_config (wheel_type TEXT PRIMARY KEY, items TEXT NOT NULL DEFAULT '[]', updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
+    'CREATE TABLE IF NOT EXISTS wheel_spins (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, wheel_type TEXT NOT NULL, item_type TEXT NOT NULL, item_name TEXT, amount REAL, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)',
+    'CREATE TABLE IF NOT EXISTS wheel_settings (id INTEGER PRIMARY KEY CHECK (id = 1), spin_limit_per_user INTEGER NOT NULL DEFAULT 0)',
+    'INSERT OR IGNORE INTO wheel_settings (id, spin_limit_per_user) VALUES (1, 0)',
+    'CREATE TABLE IF NOT EXISTS wheel_spin_resets (username TEXT NOT NULL, wheel_type TEXT NOT NULL, reset_offset INTEGER NOT NULL DEFAULT 0, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (username, wheel_type))',
+    'CREATE TABLE IF NOT EXISTS user_wheel_limits (username TEXT PRIMARY KEY, reward_limit INTEGER, penalty_limit INTEGER, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)',
+    "CREATE TABLE IF NOT EXISTS asset_logs (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, action TEXT NOT NULL, title TEXT NOT NULL, detail TEXT DEFAULT '', created_at DATETIME DEFAULT CURRENT_TIMESTAMP)",
+    'CREATE INDEX IF NOT EXISTS idx_asset_logs_user ON asset_logs(username, created_at)'
+  ]
+  await DB.batch(ddl.map(sql => DB.prepare(sql)))
+
+  // 兼容旧表：补充新列（已存在时报错，直接忽略）；并行执行减少等待
+  const alters = [
+    'ALTER TABLE announcements ADD COLUMN image TEXT',
+    'ALTER TABLE announcements ADD COLUMN is_pinned INTEGER DEFAULT 0',
+    'ALTER TABLE announcements ADD COLUMN is_displayed INTEGER DEFAULT 0',
+    'ALTER TABLE messages ADD COLUMN image TEXT',
+    'ALTER TABLE rewards ADD COLUMN quantity INTEGER DEFAULT 1',
+    'ALTER TABLE penalties ADD COLUMN quantity INTEGER DEFAULT 1',
+    'ALTER TABLE loan_config ADD COLUMN bank_open INTEGER DEFAULT 1',
+    'ALTER TABLE reward_types ADD COLUMN shop_enabled INTEGER DEFAULT 0',
+    'ALTER TABLE penalty_types ADD COLUMN shop_enabled INTEGER DEFAULT 0',
+    'ALTER TABLE products ADD COLUMN shop_enabled INTEGER DEFAULT 0'
+  ]
+  await Promise.allSettled(alters.map(sql => DB.prepare(sql).run()))
+
+  // 确保默认管理员存在
+  const existing = await DB.prepare('SELECT id FROM users WHERE username = ?').bind('zhou').first()
+  if (!existing) {
+    const hashedPassword = await hashPassword('Asd123**')
     await DB.prepare(
-      'CREATE TABLE IF NOT EXISTS announcements (id INTEGER PRIMARY KEY AUTOINCREMENT, title TEXT NOT NULL, content TEXT, image TEXT, created_by TEXT, is_pinned INTEGER DEFAULT 0, is_displayed INTEGER DEFAULT 0, created_at DATETIME DEFAULT CURRENT_TIMESTAMP, updated_at DATETIME DEFAULT CURRENT_TIMESTAMP)'
-    ).run()
-    await DB.prepare(
-      'CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, username TEXT NOT NULL, content TEXT NOT NULL, image TEXT, created_at DATETIME DEFAULT CURRENT_TIMESTAMP)'
-    ).run()
-    // 兼容旧表：尝试添加新列（表已存在时忽略错误）
-    try { await DB.prepare('ALTER TABLE announcements ADD COLUMN image TEXT').run() } catch(e) {}
-    try { await DB.prepare('ALTER TABLE announcements ADD COLUMN is_pinned INTEGER DEFAULT 0').run() } catch(e) {}
-    try { await DB.prepare('ALTER TABLE announcements ADD COLUMN is_displayed INTEGER DEFAULT 0').run() } catch(e) {}
-    try { await DB.prepare('ALTER TABLE messages ADD COLUMN image TEXT').run() } catch(e) {}
-    try { await DB.prepare('ALTER TABLE loan_config ADD COLUMN bank_open INTEGER DEFAULT 1').run() } catch(e) {}
-  } catch (error) {
-    console.error('Failed to ensure tables:', error)
+      'INSERT INTO users (username, password, role, balance) VALUES (?, ?, ?, ?)'
+    ).bind('zhou', hashedPassword, 'admin', 999999).run()
   }
 }
 
@@ -674,10 +745,29 @@ async function handleGetRewards(DB, username) {
 
 async function handleCreateReward(request, DB) {
   const reward = await request.json()
-  
+  const quantity = Math.max(1, parseInt(reward.quantity) || 1)
+
+  // 同类项合并：同一用户同名奖励累加数量和价值
+  const existing = await DB.prepare(
+    'SELECT id FROM rewards WHERE username = ? AND name = ?'
+  ).bind(reward.username, reward.name).first()
+  if (existing) {
+    await DB.prepare(
+      "UPDATE rewards SET quantity = quantity + ?, value = value + ?, updated_at = datetime('now') WHERE id = ?"
+    ).bind(quantity, parseFloat(reward.value) || 0, existing.id).run()
+    const merged = await DB.prepare('SELECT * FROM rewards WHERE id = ?').bind(existing.id).first()
+    await logAssetChange(DB, reward.username, 'reward', `管理员添加奖励：${reward.name}`, `x${quantity}`)
+    return new Response(JSON.stringify({ success: true, data: merged }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
   const result = await DB.prepare(
-    'INSERT INTO rewards (username, name, value, description) VALUES (?, ?, ?, ?)'
-  ).bind(reward.username, reward.name, reward.value, reward.description || '').run()
+    'INSERT INTO rewards (username, name, value, description, quantity) VALUES (?, ?, ?, ?, ?)'
+  ).bind(reward.username, reward.name, reward.value, reward.description || '', quantity).run()
+
+  await logAssetChange(DB, reward.username, 'reward', `管理员添加奖励：${reward.name}`, `x${quantity}`)
 
   const newReward = await DB.prepare('SELECT * FROM rewards WHERE id = ?').bind(result.meta.last_row_id).first()
 
@@ -699,8 +789,8 @@ async function handleUpdateReward(request, DB, id) {
   }
 
   await DB.prepare(
-    'UPDATE rewards SET name = ?, value = ?, description = ?, updated_at = datetime(\'now\') WHERE id = ?'
-  ).bind(reward.name, reward.value, reward.description || '', id).run()
+    "UPDATE rewards SET name = ?, value = ?, description = ?, quantity = ?, updated_at = datetime('now') WHERE id = ?"
+  ).bind(reward.name, reward.value, reward.description || '', Math.max(1, parseInt(reward.quantity) || 1), id).run()
 
   const updated = await DB.prepare('SELECT * FROM rewards WHERE id = ?').bind(id).first()
 
@@ -740,10 +830,29 @@ async function handleGetPenalties(DB, username) {
 
 async function handleCreatePenalty(request, DB) {
   const penalty = await request.json()
-  
+  const quantity = Math.max(1, parseInt(penalty.quantity) || 1)
+
+  // 同类项合并：同一用户同名惩罚累加数量和金额
+  const existing = await DB.prepare(
+    'SELECT id FROM penalties WHERE username = ? AND name = ?'
+  ).bind(penalty.username, penalty.name).first()
+  if (existing) {
+    await DB.prepare(
+      "UPDATE penalties SET quantity = quantity + ?, amount = amount + ?, updated_at = datetime('now') WHERE id = ?"
+    ).bind(quantity, parseFloat(penalty.amount) || 0, existing.id).run()
+    const merged = await DB.prepare('SELECT * FROM penalties WHERE id = ?').bind(existing.id).first()
+    await logAssetChange(DB, penalty.username, 'penalty', `管理员添加惩罚：${penalty.name}`, `x${quantity}`)
+    return new Response(JSON.stringify({ success: true, data: merged }), {
+      status: 200,
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
   const result = await DB.prepare(
-    'INSERT INTO penalties (username, name, amount, description) VALUES (?, ?, ?, ?)'
-  ).bind(penalty.username, penalty.name, penalty.amount, penalty.description || '').run()
+    'INSERT INTO penalties (username, name, amount, description, quantity) VALUES (?, ?, ?, ?, ?)'
+  ).bind(penalty.username, penalty.name, penalty.amount, penalty.description || '', quantity).run()
+
+  await logAssetChange(DB, penalty.username, 'penalty', `管理员添加惩罚：${penalty.name}`, `x${quantity}`)
 
   const newPenalty = await DB.prepare('SELECT * FROM penalties WHERE id = ?').bind(result.meta.last_row_id).first()
 
@@ -765,8 +874,8 @@ async function handleUpdatePenalty(request, DB, id) {
   }
 
   await DB.prepare(
-    'UPDATE penalties SET name = ?, amount = ?, description = ?, updated_at = datetime(\'now\') WHERE id = ?'
-  ).bind(penalty.name, penalty.amount, penalty.description || '', id).run()
+    "UPDATE penalties SET name = ?, amount = ?, description = ?, quantity = ?, updated_at = datetime('now') WHERE id = ?"
+  ).bind(penalty.name, penalty.amount, penalty.description || '', Math.max(1, parseInt(penalty.quantity) || 1), id).run()
 
   const updated = await DB.prepare('SELECT * FROM penalties WHERE id = ?').bind(id).first()
 
@@ -972,7 +1081,7 @@ async function handlePurchase(request, DB) {
   }
 
   if (user.balance < product.price) {
-    return new Response(JSON.stringify({ error: '余额不足' }), {
+    return new Response(JSON.stringify({ error: '筹码不足' }), {
       status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
@@ -1062,7 +1171,20 @@ async function handleUpdateAnnouncement(request, DB, id) {
 // === 留言板 ===
 async function handleGetMessages(DB) {
   const messages = await DB.prepare('SELECT * FROM messages ORDER BY created_at DESC LIMIT 100').all()
-  return new Response(JSON.stringify({ success: true, data: messages.results || [] }), {
+  const list = messages.results || []
+  let commentsByMessage = {}
+  if (list.length > 0) {
+    const placeholders = list.map(() => '?').join(',')
+    const comments = await DB.prepare(
+      `SELECT * FROM message_comments WHERE message_id IN (${placeholders}) ORDER BY created_at ASC`
+    ).bind(...list.map(m => m.id)).all()
+    for (const c of comments.results || []) {
+      if (!commentsByMessage[c.message_id]) commentsByMessage[c.message_id] = []
+      commentsByMessage[c.message_id].push(c)
+    }
+  }
+  const data = list.map(m => ({ ...m, comments: commentsByMessage[m.id] || [] }))
+  return new Response(JSON.stringify({ success: true, data }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   })
 }
@@ -1088,7 +1210,56 @@ async function handleCreateMessage(request, DB) {
 
 async function handleDeleteMessage(request, DB, id) {
   await DB.prepare('DELETE FROM messages WHERE id = ?').bind(id).run()
+  // 留言删除后同时清掉它的评论
+  await DB.prepare('DELETE FROM message_comments WHERE message_id = ?').bind(id).run()
   return new Response(JSON.stringify({ success: true, message: '留言已删除' }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// === 留言评论 ===
+async function handleCreateComment(request, DB, messageId) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  const { username } = authResult
+  const { content } = await request.json()
+  if (!content || content.trim() === '') {
+    return new Response(JSON.stringify({ error: '评论内容不能为空' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+  const message = await DB.prepare('SELECT id FROM messages WHERE id = ?').bind(messageId).first()
+  if (!message) {
+    return new Response(JSON.stringify({ error: '留言不存在' }), {
+      status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+  const result = await DB.prepare(
+    'INSERT INTO message_comments (message_id, username, content) VALUES (?, ?, ?)'
+  ).bind(messageId, username, content.trim()).run()
+  const newComment = await DB.prepare('SELECT * FROM message_comments WHERE id = ?').bind(result.meta.last_row_id).first()
+  return new Response(JSON.stringify({ success: true, data: newComment }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+async function handleDeleteComment(request, DB, id) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  const { username, role } = authResult
+  const comment = await DB.prepare('SELECT * FROM message_comments WHERE id = ?').bind(id).first()
+  if (!comment) {
+    return new Response(JSON.stringify({ error: '评论不存在' }), {
+      status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+  if (comment.username !== username && role !== 'admin') {
+    return new Response(JSON.stringify({ error: '只能删除自己的评论' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+  await DB.prepare('DELETE FROM message_comments WHERE id = ?').bind(id).run()
+  return new Response(JSON.stringify({ success: true, message: '评论已删除' }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   })
 }
@@ -1117,6 +1288,28 @@ async function handleGetUserAssets(request, DB) {
   })
 }
 
+// 记录资产变更日志（失败不影响主流程）
+async function logAssetChange(DB, username, action, title, detail) {
+  try {
+    await DB.prepare('INSERT INTO asset_logs (username, action, title, detail) VALUES (?, ?, ?, ?)')
+      .bind(username, action, title, detail || '').run()
+  } catch (e) {
+    console.error('logAssetChange failed:', e)
+  }
+}
+
+// 获取当前用户的资产变更记录（最近100条）
+async function handleGetAssetLogs(request, DB) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  const logs = await DB.prepare(
+    'SELECT id, action, title, detail, created_at FROM asset_logs WHERE username = ? ORDER BY created_at DESC, id DESC LIMIT 100'
+  ).bind(authResult.username).all()
+  return new Response(JSON.stringify({ success: true, data: logs.results || [] }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
 async function handleGetUsers(DB) {
   const users = await DB.prepare('SELECT username, role, balance, created_at FROM users ORDER BY created_at DESC').all()
   return new Response(JSON.stringify({ success: true, data: users.results || [] }), {
@@ -1127,8 +1320,8 @@ async function handleGetUsers(DB) {
 
 async function handleUpdateUserBalance(request, DB, username) {
   const { balance } = await request.json()
-  
-  const existing = await DB.prepare('SELECT id FROM users WHERE username = ?').bind(username).first()
+
+  const existing = await DB.prepare('SELECT id, balance FROM users WHERE username = ?').bind(username).first()
   if (!existing) {
     return new Response(JSON.stringify({ error: '用户不存在' }), {
       status: 404,
@@ -1138,6 +1331,12 @@ async function handleUpdateUserBalance(request, DB, username) {
 
   await DB.prepare('UPDATE users SET balance = ?, updated_at = datetime(\'now\') WHERE username = ?')
     .bind(balance, username).run()
+
+  // 资产变更记录
+  const oldBalance = existing.balance || 0
+  const delta = balance - oldBalance
+  await logAssetChange(DB, username, 'balance', '管理员调整筹码',
+    `${oldBalance} → ${balance}（${delta >= 0 ? '+' : ''}${delta}）`)
 
   return new Response(JSON.stringify({ success: true }), {
     status: 200,
@@ -1239,7 +1438,7 @@ async function handleRedeemReward(request, DB) {
   const totalPrice = reward.price * quantity
   const user = await DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
   if (user.balance < totalPrice) {
-    return new Response(JSON.stringify({ error: '余额不足' }), {
+    return new Response(JSON.stringify({ error: '筹码不足' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
@@ -1249,14 +1448,25 @@ async function handleRedeemReward(request, DB) {
     'INSERT INTO redemptions (username, reward_type_id, reward_name, price, quantity) VALUES (?, ?, ?, ?, ?)'
   ).bind(username, reward.id, reward.name, reward.price, quantity).run()
 
-  // 将兑换的奖励添加到用户的奖励资产中
-  for (let i = 0; i < quantity; i++) {
+  // 将兑换的奖励合并到用户的奖励资产中（同类项累加数量）
+  const existingReward = await DB.prepare(
+    'SELECT id FROM rewards WHERE username = ? AND name = ?'
+  ).bind(username, reward.name).first()
+  if (existingReward) {
     await DB.prepare(
-      'INSERT INTO rewards (username, name, value, description) VALUES (?, ?, ?, ?)'
-    ).bind(username, reward.name, reward.price, reward.description || '从商店兑换').run()
+      "UPDATE rewards SET quantity = quantity + ?, value = value + ?, updated_at = datetime('now') WHERE id = ?"
+    ).bind(quantity, reward.price * quantity, existingReward.id).run()
+  } else {
+    await DB.prepare(
+      'INSERT INTO rewards (username, name, value, description, quantity) VALUES (?, ?, ?, ?, ?)'
+    ).bind(username, reward.name, reward.price * quantity, '从商店兑换', quantity).run()
   }
 
   const updatedUser = await DB.prepare('SELECT balance FROM users WHERE username = ?').bind(username).first()
+
+  // 资产变更记录
+  await logAssetChange(DB, username, 'balance', '商店兑换奖励', `-${totalPrice}（${reward.name} x${quantity}）`)
+  await logAssetChange(DB, username, 'reward', `商店兑换奖励：${reward.name}`, `x${quantity}`)
 
   return new Response(JSON.stringify({ success: true, message: `成功兑换 ${reward.name} x${quantity}`, balance: updatedUser.balance }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -1288,7 +1498,7 @@ async function handlePayPenalty(request, DB) {
   const totalPrice = penalty.price * quantity
   const user = await DB.prepare('SELECT * FROM users WHERE username = ?').bind(username).first()
   if (user.balance < totalPrice) {
-    return new Response(JSON.stringify({ error: '余额不足' }), {
+    return new Response(JSON.stringify({ error: '筹码不足' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
@@ -1315,7 +1525,431 @@ async function handlePayPenalty(request, DB) {
 
   const updatedUser = await DB.prepare('SELECT balance FROM users WHERE username = ?').bind(username).first()
 
+  // 资产变更记录
+  await logAssetChange(DB, username, 'balance', '消除惩罚', `-${totalPrice}（${penalty.name} x${quantity}）`)
+
   return new Response(JSON.stringify({ success: true, message: `成功消除惩罚 ${penalty.name} x${quantity}`, balance: updatedUser.balance }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// ==================== 转盘系统 ====================
+
+// 校验并规范化转盘配置项
+function normalizeWheelItems(items, wheelType) {
+  if (!Array.isArray(items)) return null
+  const result = []
+  for (const item of items) {
+    // 允许在奖励转盘中混入惩罚项目（反之亦然）；type 非法时回退到转盘类型
+    let type = item.type
+    if (type !== 'chip' && type !== 'reward' && type !== 'penalty') type = wheelType
+    // count 即权重：决定中奖概率与转盘上所占面积（格子数）
+    const count = Math.max(1, Math.min(99, parseInt(item.count) || 1))
+    if (type === 'chip') {
+      const amount = Number(item.amount)
+      if (isNaN(amount) || amount <= 0) return null
+      result.push({ type: 'chip', amount, count })
+    } else {
+      const refId = parseInt(item.refId)
+      const name = (item.name || '').toString().trim()
+      if (!refId || !name) return null
+      const resultItem = { type, refId, name, count }
+      // 惩罚项目不再定义数量 N：数量由“数量小转盘”单独转出
+      result.push(resultItem)
+    }
+  }
+  return result
+}
+
+// 校验并规范化“数量小转盘”配置项（惩罚数量由该转盘转出）
+function normalizeQuantityItems(items) {
+  if (!Array.isArray(items)) return null
+  const result = []
+  for (const item of items) {
+    const times = parseInt(item.times)
+    if (isNaN(times) || times <= 0) return null
+    const count = Math.max(1, Math.min(99, parseInt(item.count) || 1))
+    result.push({ times: Math.min(999, times), count })
+  }
+  return result
+}
+
+// 统计用户每个转盘的有效已用次数（扣除管理员重置偏移）
+async function getWheelUsedSpins(DB, username) {
+  const counts = { reward: 0, penalty: 0 }
+  const rows = await DB.prepare('SELECT wheel_type, COUNT(*) AS c FROM wheel_spins WHERE username = ? GROUP BY wheel_type').bind(username).all()
+  for (const row of rows.results || []) {
+    if (row.wheel_type === 'reward') counts.reward = row.c
+    if (row.wheel_type === 'penalty') counts.penalty = row.c
+  }
+  const resets = await DB.prepare('SELECT wheel_type, reset_offset FROM wheel_spin_resets WHERE username = ?').bind(username).all()
+  for (const row of resets.results || []) {
+    if (row.wheel_type === 'reward' || row.wheel_type === 'penalty') {
+      counts[row.wheel_type] = Math.max(0, counts[row.wheel_type] - (row.reset_offset || 0))
+    }
+  }
+  return counts
+}
+
+// 获取转盘次数限制：按用户定义优先，未定义(NULL)则跟随全局设置；0 = 不限
+async function getWheelLimits(DB, username) {
+  const settingsRow = await DB.prepare('SELECT spin_limit_per_user FROM wheel_settings WHERE id = 1').first()
+  const globalLimit = settingsRow ? (settingsRow.spin_limit_per_user || 0) : 0
+  const limits = { reward: globalLimit, penalty: globalLimit }
+  if (username) {
+    const row = await DB.prepare('SELECT reward_limit, penalty_limit FROM user_wheel_limits WHERE username = ?').bind(username).first()
+    if (row) {
+      if (row.reward_limit !== null && row.reward_limit !== undefined) limits.reward = row.reward_limit
+      if (row.penalty_limit !== null && row.penalty_limit !== undefined) limits.penalty = row.penalty_limit
+    }
+  }
+  return limits
+}
+
+// 获取转盘配置（所有用户可见）；带登录态时附带当前用户已用次数
+async function handleGetWheelConfig(request, DB) {
+  const rows = await DB.prepare('SELECT wheel_type, items FROM wheel_config').all()
+  const config = { reward: [], penalty: [], penaltyQuantity: [] }
+  for (const row of rows.results || []) {
+    try {
+      const parsed = JSON.parse(row.items)
+      if (Array.isArray(parsed)) {
+        if (row.wheel_type === 'penalty_quantity') config.penaltyQuantity = parsed
+        else config[row.wheel_type] = parsed
+      }
+    } catch (e) {}
+  }
+  const settingsRow = await DB.prepare('SELECT spin_limit_per_user FROM wheel_settings WHERE id = 1').first()
+  const spinLimitPerUser = settingsRow ? (settingsRow.spin_limit_per_user || 0) : 0
+
+  let usedSpins = null
+  let spinLimits = { reward: spinLimitPerUser, penalty: spinLimitPerUser }
+  const authResult = await authenticate(request, DB)
+  if (!authResult.error) {
+    // 每个转盘单独计数（含重置偏移）；次数限制按用户定义优先
+    usedSpins = await getWheelUsedSpins(DB, authResult.username)
+    spinLimits = await getWheelLimits(DB, authResult.username)
+  }
+
+  return new Response(JSON.stringify({ success: true, data: { reward: config.reward, penalty: config.penalty, penaltyQuantity: config.penaltyQuantity, spinLimitPerUser, spinLimits, usedSpins } }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// 保存转盘配置（管理员）
+async function handleUpdateWheelConfig(request, DB) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  if (authResult.role !== 'admin') {
+    return new Response(JSON.stringify({ error: '仅管理员可操作' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  const { reward, penalty, penaltyQuantity, spinLimitPerUser } = await request.json()
+  const rewardItems = normalizeWheelItems(reward, 'reward')
+  const penaltyItems = normalizeWheelItems(penalty, 'penalty')
+  const quantityItems = normalizeQuantityItems(penaltyQuantity)
+  if (rewardItems === null || penaltyItems === null || quantityItems === null) {
+    return new Response(JSON.stringify({ error: '转盘配置格式不正确' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  for (const [wheelType, items] of [['reward', rewardItems], ['penalty', penaltyItems], ['penalty_quantity', quantityItems]]) {
+    const existing = await DB.prepare('SELECT wheel_type FROM wheel_config WHERE wheel_type = ?').bind(wheelType).first()
+    if (existing) {
+      await DB.prepare("UPDATE wheel_config SET items = ?, updated_at = datetime('now') WHERE wheel_type = ?")
+        .bind(JSON.stringify(items), wheelType).run()
+    } else {
+      await DB.prepare('INSERT INTO wheel_config (wheel_type, items) VALUES (?, ?)')
+        .bind(wheelType, JSON.stringify(items)).run()
+    }
+  }
+
+  // 保存每用户可转次数（0 = 不限）
+  let savedLimit = 0
+  if (spinLimitPerUser !== undefined) {
+    savedLimit = Math.max(0, Math.min(999999, parseInt(spinLimitPerUser) || 0))
+    const existingSetting = await DB.prepare('SELECT id FROM wheel_settings WHERE id = 1').first()
+    if (existingSetting) {
+      await DB.prepare('UPDATE wheel_settings SET spin_limit_per_user = ? WHERE id = 1').bind(savedLimit).run()
+    } else {
+      await DB.prepare('INSERT INTO wheel_settings (id, spin_limit_per_user) VALUES (1, ?)').bind(savedLimit).run()
+    }
+  } else {
+    const settingsRow = await DB.prepare('SELECT spin_limit_per_user FROM wheel_settings WHERE id = 1').first()
+    savedLimit = settingsRow ? (settingsRow.spin_limit_per_user || 0) : 0
+  }
+
+  return new Response(JSON.stringify({ success: true, data: { reward: rewardItems, penalty: penaltyItems, penaltyQuantity: quantityItems, spinLimitPerUser: savedLimit } }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// 转动转盘：服务端随机决定结果并生效
+async function handleWheelSpin(request, DB) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  const { username } = authResult
+  const { wheelType } = await request.json()
+
+  if (wheelType !== 'reward' && wheelType !== 'penalty') {
+    return new Response(JSON.stringify({ error: '转盘类型不正确' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  // 检查可转次数：按用户定义优先，未定义跟随全局（0 = 不限，两个转盘分开计数）
+  const limits = await getWheelLimits(DB, username)
+  const spinLimit = limits[wheelType] || 0
+  let usedSpins = 0
+  if (spinLimit > 0) {
+    usedSpins = (await getWheelUsedSpins(DB, username))[wheelType] || 0
+    if (usedSpins >= spinLimit) {
+      return new Response(JSON.stringify({ error: `该转盘次数已用完（${usedSpins}/${spinLimit}）` }), {
+        status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      })
+    }
+  }
+
+  const configRow = await DB.prepare('SELECT items FROM wheel_config WHERE wheel_type = ?').bind(wheelType).first()
+  let items = []
+  try { items = JSON.parse(configRow?.items) || [] } catch (e) {}
+  if (!Array.isArray(items) || items.length === 0) {
+    return new Response(JSON.stringify({ error: '转盘尚未配置' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  // 按权重展开成格子：权重同时决定中奖概率与转盘面积
+  const segments = []
+  for (const item of items) {
+    const count = Math.max(1, parseInt(item.count) || 1)
+    for (let i = 0; i < count; i++) segments.push(item)
+  }
+
+  const index = Math.floor(Math.random() * segments.length)
+  const item = segments[index]
+
+  let message = ''
+  let balance = null
+  let image = null
+  let quantityWheelResult = null // 惩罚命中时：数量小转盘的服务端结果
+
+  if (item.type === 'chip') {
+    if (wheelType === 'reward') {
+      await DB.prepare('UPDATE users SET balance = balance + ? WHERE username = ?').bind(item.amount, username).run()
+      message = `🎉 恭喜获得 ${item.amount} 筹码！`
+    } else {
+      await DB.prepare('UPDATE users SET balance = balance - ? WHERE username = ?').bind(item.amount, username).run()
+      message = `😖 惩罚：扣除 ${item.amount} 筹码`
+    }
+    const updatedUser = await DB.prepare('SELECT balance FROM users WHERE username = ?').bind(username).first()
+    balance = updatedUser.balance
+    // 资产变更记录
+    await logAssetChange(DB, username, 'balance', item.amount > 0 ? '转盘获得筹码' : '转盘扣除筹码',
+      `${item.amount > 0 ? '+' : ''}${item.amount}`)
+  } else {
+    // 效果按项目类型生效（奖励转盘中混入的惩罚项目同样生效）
+    const table = item.type === 'reward' ? 'reward_types' : 'penalty_types'
+    const typeRow = await DB.prepare(`SELECT name, price, image FROM ${table} WHERE id = ?`).bind(item.refId).first()
+    const name = typeRow ? typeRow.name : item.name
+    image = typeRow ? (typeRow.image || null) : null
+    if (item.type === 'reward') {
+      // 奖励直接添加到用户奖励资产（同名合并数量）
+      const quantity = 1
+      const existingReward = await DB.prepare(
+        'SELECT id FROM rewards WHERE username = ? AND name = ?'
+      ).bind(username, name).first()
+      if (existingReward) {
+        await DB.prepare(
+          "UPDATE rewards SET quantity = quantity + ?, value = value + ?, updated_at = datetime('now') WHERE id = ?"
+        ).bind(quantity, typeRow ? typeRow.price : 0, existingReward.id).run()
+      } else {
+        await DB.prepare(
+          'INSERT INTO rewards (username, name, value, description, quantity) VALUES (?, ?, ?, ?, ?)'
+        ).bind(username, name, typeRow ? typeRow.price : 0, '', quantity).run()
+      }
+      message = `🎉 恭喜获得奖励：${name}！`
+      await logAssetChange(DB, username, 'reward', `转盘获得奖励：${name}`,
+        quantity > 1 ? `x${quantity}` : '')
+    } else {
+      // 惩罚数量由“数量小转盘”决定：服务端随机转出（未配置则回退旧配置的 times，再退 1）
+      const qtyRow = await DB.prepare("SELECT items FROM wheel_config WHERE wheel_type = 'penalty_quantity'").first()
+      let qtyItems = []
+      try { qtyItems = JSON.parse(qtyRow?.items) || [] } catch (e) {}
+      const qtySegments = []
+      for (const q of (Array.isArray(qtyItems) ? qtyItems : [])) {
+        const c = Math.max(1, parseInt(q.count) || 1)
+        for (let i = 0; i < c; i++) qtySegments.push(q)
+      }
+      let quantity = 1
+      let qtyIndex = -1
+      if (qtySegments.length > 0) {
+        qtyIndex = Math.floor(Math.random() * qtySegments.length)
+        quantity = Math.max(1, parseInt(qtySegments[qtyIndex].times) || 1)
+      } else if (item.times && item.times > 0) {
+        quantity = item.times // 兼容旧配置：数量小转盘未配置时沿用惩罚项目原定义
+      }
+      const timesSuffix = quantity > 1 ? ` ${quantity}下` : ''
+      // 惩罚直接添加到用户惩罚记录（同名合并数量）
+      const existingPenalty = await DB.prepare(
+        'SELECT id FROM penalties WHERE username = ? AND name = ?'
+      ).bind(username, name).first()
+      if (existingPenalty) {
+        await DB.prepare(
+          "UPDATE penalties SET quantity = quantity + ?, amount = amount + ?, updated_at = datetime('now') WHERE id = ?"
+        ).bind(quantity, typeRow ? typeRow.price : 0, existingPenalty.id).run()
+      } else {
+        await DB.prepare(
+          'INSERT INTO penalties (username, name, amount, description, quantity) VALUES (?, ?, ?, ?, ?)'
+        ).bind(username, name, typeRow ? typeRow.price : 0, '', quantity).run()
+      }
+      message = `😖 惩罚：${name}${timesSuffix}`
+      await logAssetChange(DB, username, 'penalty', `转盘增加惩罚：${name}`,
+        quantity > 1 ? `x${quantity}` : '')
+      if (qtyIndex >= 0) quantityWheelResult = { index: qtyIndex, quantity, items: qtyItems }
+    }
+  }
+
+  await DB.prepare(
+    'INSERT INTO wheel_spins (username, wheel_type, item_type, item_name, amount) VALUES (?, ?, ?, ?, ?)'
+  ).bind(
+    username, wheelType, item.type,
+    item.type === 'chip' ? `${item.amount} 筹码` : `${item.name}${item.type === 'penalty' && quantityWheelResult ? ` ${quantityWheelResult.quantity}下` : ''}`,
+    item.type === 'chip' ? item.amount : null
+  ).run()
+
+  const remaining = spinLimit > 0 ? Math.max(0, spinLimit - usedSpins - 1) : null
+
+  return new Response(JSON.stringify({
+    success: true,
+    index,
+    item: item.type === 'chip' ? { type: 'chip', name: `${item.amount} 筹码`, amount: item.amount } : { type: item.type, name: item.name },
+    message,
+    balance,
+    image,
+    remaining,
+    quantityWheel: quantityWheelResult
+  }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// 获取转盘历史记录（最近20条，所有用户可见）
+async function handleGetWheelHistory(DB) {
+  const spins = await DB.prepare(
+    'SELECT id, username, wheel_type, item_type, item_name, amount, created_at FROM wheel_spins ORDER BY created_at DESC, id DESC LIMIT 20'
+  ).all()
+  return new Response(JSON.stringify({ success: true, data: spins.results || [] }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// 管理员重置用户转盘次数：将当前已用次数记为偏移，统计时跳过
+async function handleAdminWheelReset(request, DB, username) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  if (authResult.role !== 'admin') {
+    return new Response(JSON.stringify({ error: '仅管理员可操作' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+  if (!username) {
+    return new Response(JSON.stringify({ error: '缺少用户名' }), {
+      status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  const user = await DB.prepare('SELECT username FROM users WHERE username = ?').bind(username).first()
+  if (!user) {
+    return new Response(JSON.stringify({ error: '用户不存在' }), {
+      status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  const { wheelType } = await request.json().catch(() => ({}))
+  const targets = wheelType === 'reward' || wheelType === 'penalty' ? [wheelType] : ['reward', 'penalty']
+
+  for (const type of targets) {
+    const countRow = await DB.prepare('SELECT COUNT(*) AS c FROM wheel_spins WHERE username = ? AND wheel_type = ?').bind(username, type).first()
+    const offset = countRow ? countRow.c : 0
+    const existing = await DB.prepare('SELECT username FROM wheel_spin_resets WHERE username = ? AND wheel_type = ?').bind(username, type).first()
+    if (existing) {
+      await DB.prepare("UPDATE wheel_spin_resets SET reset_offset = ?, updated_at = datetime('now') WHERE username = ? AND wheel_type = ?")
+        .bind(offset, username, type).run()
+    } else {
+      await DB.prepare('INSERT INTO wheel_spin_resets (username, wheel_type, reset_offset) VALUES (?, ?, ?)')
+        .bind(username, type, offset).run()
+    }
+  }
+
+  return new Response(JSON.stringify({ success: true, message: `已重置用户「${username}」的转盘次数` }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// 获取按用户定义的转盘次数（NULL = 跟随全局）
+async function handleGetUserWheelLimits(request, DB, username) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  if (authResult.role !== 'admin') {
+    return new Response(JSON.stringify({ error: '仅管理员可操作' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+  const row = await DB.prepare('SELECT reward_limit, penalty_limit FROM user_wheel_limits WHERE username = ?').bind(username).first()
+  return new Response(JSON.stringify({
+    success: true,
+    data: {
+      reward: row ? row.reward_limit : null,
+      penalty: row ? row.penalty_limit : null
+    }
+  }), {
+    status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+  })
+}
+
+// 设置按用户定义的转盘次数（null = 跟随全局，0 = 不限）
+async function handleUpdateUserWheelLimits(request, DB, username) {
+  const authResult = await authenticate(request, DB)
+  if (authResult.error) return authResult.response
+  if (authResult.role !== 'admin') {
+    return new Response(JSON.stringify({ error: '仅管理员可操作' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  const user = await DB.prepare('SELECT username FROM users WHERE username = ?').bind(username).first()
+  if (!user) {
+    return new Response(JSON.stringify({ error: '用户不存在' }), {
+      status: 404, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+    })
+  }
+
+  const { reward, penalty } = await request.json()
+  // 空值 = 跟随全局设置；数字 = 具体次数（0 = 不限）
+  const toLimit = v => (v === null || v === undefined || v === '')
+    ? null
+    : Math.max(0, Math.min(999999, parseInt(v) || 0))
+  const rewardLimit = toLimit(reward)
+  const penaltyLimit = toLimit(penalty)
+
+  const existing = await DB.prepare('SELECT username FROM user_wheel_limits WHERE username = ?').bind(username).first()
+  if (existing) {
+    await DB.prepare("UPDATE user_wheel_limits SET reward_limit = ?, penalty_limit = ?, updated_at = datetime('now') WHERE username = ?")
+      .bind(rewardLimit, penaltyLimit, username).run()
+  } else {
+    await DB.prepare('INSERT INTO user_wheel_limits (username, reward_limit, penalty_limit) VALUES (?, ?, ?)')
+      .bind(username, rewardLimit, penaltyLimit).run()
+  }
+
+  return new Response(JSON.stringify({
+    success: true,
+    data: { reward: rewardLimit, penalty: penaltyLimit },
+    message: `已保存用户「${username}」的转盘次数设置`
+  }), {
     status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
   })
 }
@@ -1408,7 +2042,7 @@ async function handleApplyLoan(request, DB) {
     'INSERT INTO loans (username, amount, interest_rate, term_days, total_repay, remaining, due_date) VALUES (?, ?, ?, ?, ?, ?, ?)'
   ).bind(username, amount, interestRate, termDays, totalRepay, totalRepay, dueDateStr).run()
 
-  // 放款到用户余额
+  // 放款到用户筹码
   await DB.prepare('UPDATE users SET balance = balance + ? WHERE username = ?').bind(amount, username).run()
 
   const loan = await DB.prepare('SELECT * FROM loans WHERE id = ?').bind(result.meta.last_row_id).first()
@@ -1477,7 +2111,7 @@ async function handleRepayLoan(request, DB) {
 
   const user = await DB.prepare('SELECT balance FROM users WHERE username = ?').bind(username).first()
   if (user.balance < repayAmount) {
-    return new Response(JSON.stringify({ error: '余额不足' }), {
+    return new Response(JSON.stringify({ error: '筹码不足' }), {
       status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     })
   }
@@ -1528,43 +2162,17 @@ async function handleSettleLoan(request, DB) {
 }
 
 async function authenticate(request, DB) {
-  const token = request.headers.get('Authorization')?.replace('Bearer ', '')
-  if (!token) {
+  try {
+    return await requireAuth(request, DB)
+  } catch (error) {
     return {
       error: true,
-      response: new Response(JSON.stringify({ error: '未授权' }), {
-        status: 401,
+      response: new Response(JSON.stringify({ error: error.message || '未授权' }), {
+        status: error.status || 401,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' }
       })
     }
   }
-
-  const tokenData = await DB.prepare(
-    'SELECT username, expires_at FROM tokens WHERE token = ?'
-  ).bind(token).first()
-
-  if (!tokenData || tokenData.expires_at < Date.now()) {
-    return {
-      error: true,
-      response: new Response(JSON.stringify({ error: '无效的token' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-  }
-
-  const user = await DB.prepare('SELECT username, role FROM users WHERE username = ?').bind(tokenData.username).first()
-  if (!user) {
-    return {
-      error: true,
-      response: new Response(JSON.stringify({ error: '用户不存在' }), {
-        status: 401,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
-      })
-    }
-  }
-
-  return { username: user.username, role: user.role }
 }
 
 async function handleStatic(request, env) {

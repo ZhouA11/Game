@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn active" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="games" class="page active">
+                <div class="card">
+                    <div class="card-title">🎮 游戏中心</div>
+                    <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(280px, 1fr)); gap:18px">
+                        <div class="wheel-entry single" style="max-width:none; margin:0" onclick="location.href='wheel.html'">
+                            <div class="wheel-entry-icon">🎡</div>
+                            <span>幸运转盘</span>
+                            <div class="wheel-entry-sub">奖励 / 惩罚 · 转盘记录 · 配置管理</div>
+                        </div>
+                        <div class="wheel-entry single" style="max-width:none; margin:0" onclick="location.href='grab.html'">
+                            <div class="wheel-entry-icon">🧸</div>
+                            <span>鎏金抓娃娃</span>
+                            <div class="wheel-entry-sub">挖掘稀有娃娃 · 碎片 / 外观 / 现实奖励</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+    </div>
+
+    <script src="js/common.js?v=4"></script>
+    <script>initAppPage()</script>
+</body>
+</html>

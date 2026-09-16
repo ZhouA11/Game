@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only active" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="users" class="page active">
+                <div class="card">
+                    <div class="card-title">用户管理</div>
+                    <div id="usersList"></div>
+                </div>
+
+                <div id="userDetailSection" style="display: none;">
+                    <div class="card">
+                        <div class="card-title">
+                            <span id="selectedUserName"></span> - 资产管理
+                            <button class="btn btn-danger" style="float: right; margin-top: -5px;" onclick="closeUserDetail()">返回列表</button>
+                        </div>
+                        
+                        <div class="player-stats" style="margin-bottom: 30px;">
+                            <div class="player-stat">
+                                <div class="player-stat-value" id="userBalanceDisplay">¥0</div>
+                                <div class="player-stat-label">筹码</div>
+                            </div>
+                            <div class="player-stat" style="display: flex; flex-direction: column; gap: 8px;">
+                                <button class="btn btn-primary" onclick="openUserBalanceModalForSelectedUser()">修改筹码</button>
+                                <button class="btn btn-warning" onclick="resetUserPassword()">重置密码</button>
+                                <button class="btn btn-primary" onclick="openUserWheelLimitsModal()">设置转盘次数</button>
+                                <button class="btn btn-success" onclick="resetUserWheelSpins()">重置转盘次数</button>
+                            </div>
+                        </div>
+
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #28a745; margin: 0;">奖励</h3>
+                                    <button class="btn btn-success" onclick="openRewardModal()">添加</button>
+                                </div>
+                                <div id="rewardsList"></div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #ff6b6b; margin: 0;">欠款</h3>
+                                    <button class="btn btn-primary" onclick="openDebtModalForSelectedUser()">添加</button>
+                                </div>
+                                <div id="debtsList"></div>
+                            </div>
+
+                            <div>
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                                    <h3 style="color: #ff4444; margin: 0;">惩罚</h3>
+                                    <button class="btn btn-danger" onclick="openPenaltyModal()">添加</button>
+                                </div>
+                                <div id="penaltiesList"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    <div class="modal" id="userBalanceModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>修改用户筹码</h3>
+                <button class="close-btn" onclick="closeUserBalanceModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>用户名</label>
+                <input type="text" id="balanceUsername" readonly>
+            </div>
+            <div class="form-group">
+                <label>新筹码</label>
+                <input type="number" id="newBalance" placeholder="请输入新筹码">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnUpdateBalance" class="btn btn-primary" onclick="updateUserBalance()">保存</button>
+                <button class="btn btn-danger" onclick="closeUserBalanceModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="userWheelLimitsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>设置转盘次数</h3>
+                <button class="close-btn" onclick="closeUserWheelLimitsModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>奖励转盘次数</label>
+                <input type="number" id="userRewardLimit" min="0" placeholder="留空 = 跟随全局设置">
+            </div>
+            <div class="form-group">
+                <label>惩罚转盘次数</label>
+                <input type="number" id="userPenaltyLimit" min="0" placeholder="留空 = 跟随全局设置">
+            </div>
+            <p style="color: #aaa; font-size: 12px; margin: 0 0 10px;">留空 = 跟随全局“每用户可转次数”设置；0 = 不限；奖励和惩罚转盘分开计数。</p>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveUserWheelLimits" class="btn btn-primary" onclick="saveUserWheelLimits()">保存</button>
+                <button class="btn btn-danger" onclick="closeUserWheelLimitsModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="assetModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="assetModalTitle">添加资产</h3>
+                <button class="close-btn" onclick="closeAssetModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>资产名称</label>
+                <input type="text" id="assetName" placeholder="请输入资产名称">
+            </div>
+            <div class="form-group">
+                <label>资产价值</label>
+                <input type="number" id="assetValue" placeholder="请输入资产价值">
+            </div>
+            <div class="form-group">
+                <label>资产描述</label>
+                <textarea id="assetDesc" rows="3" placeholder="请输入资产描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveAsset" class="btn btn-primary" onclick="saveAsset()">保存</button>
+                <button class="btn btn-danger" onclick="closeAssetModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="debtModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="debtModalTitle">添加欠款</h3>
+                <button class="close-btn" onclick="closeDebtModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>欠款名称</label>
+                <input type="text" id="debtName" placeholder="请输入欠款名称">
+            </div>
+            <div class="form-group">
+                <label>欠款金额</label>
+                <input type="number" id="debtAmount" placeholder="请输入欠款金额">
+            </div>
+            <div class="form-group">
+                <label>欠款描述</label>
+                <textarea id="debtDesc" rows="3" placeholder="请输入欠款描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveDebt" class="btn btn-primary" onclick="saveDebt()">保存</button>
+                <button class="btn btn-danger" onclick="closeDebtModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="itemModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="itemModalTitle">添加物品</h3>
+                <button class="close-btn" onclick="closeItemModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>物品名称</label>
+                <input type="text" id="itemName" placeholder="请输入物品名称">
+            </div>
+            <div class="form-group">
+                <label>物品价值</label>
+                <input type="number" id="itemValue" placeholder="请输入物品价值">
+            </div>
+            <div class="form-group">
+                <label>物品描述</label>
+                <textarea id="itemDesc" rows="3" placeholder="请输入物品描述"></textarea>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveItem" class="btn btn-primary" onclick="saveItem()">保存</button>
+                <button class="btn btn-danger" onclick="closeItemModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="rewardModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="rewardModalTitle">添加奖励</h3>
+                <button class="close-btn" onclick="closeRewardModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>奖励名称</label>
+                <input type="text" id="rewardName" placeholder="请输入奖励名称">
+            </div>
+            <div class="form-group">
+                <label>奖励价值</label>
+                <input type="number" id="rewardValue" placeholder="请输入奖励价值">
+            </div>
+            <div class="form-group">
+                <label>奖励数量</label>
+                <input type="number" id="rewardQuantity" min="1" value="1" placeholder="请输入数量">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSaveReward" class="btn btn-success" onclick="saveReward()">保存</button>
+                <button class="btn btn-danger" onclick="closeRewardModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="penaltyModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="penaltyModalTitle">添加惩罚</h3>
+                <button class="close-btn" onclick="closePenaltyModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label>惩罚名称</label>
+                <input type="text" id="penaltyName" placeholder="请输入惩罚名称">
+            </div>
+            <div class="form-group">
+                <label>惩罚金额</label>
+                <input type="number" id="penaltyAmount" placeholder="请输入惩罚金额">
+            </div>
+            <div class="form-group">
+                <label>惩罚数量</label>
+                <input type="number" id="penaltyQuantity" min="1" value="1" placeholder="请输入数量，如打100下填100">
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <button id="btnSavePenalty" class="btn btn-danger" onclick="savePenalty()">保存</button>
+                <button class="btn btn-danger" onclick="closePenaltyModal()">取消</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+    </div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/users.js?v=4"></script>
+    <script>initAppPage(() => { if (currentUser && currentUser.role === 'admin') loadUsers() })</script>
+</body>
+</html>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn active" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="home" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">💰</div>
+                        <div class="stat-value" id="userBalanceStat">¥0</div>
+                        <div class="stat-label">我的筹码</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">🎮</div>
+                        <div class="stat-value" id="totalGames">0</div>
+                        <div class="stat-label">游戏数量</div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">📢 公告栏</div>
+                    <div id="announcementBoard">
+                        <p style="color: #aaa; text-align: center; padding: 20px;">暂无公告</p>
+                    </div>
+                    <div id="adminAnnouncementSection" class="admin-only" style="margin-top: 16px; padding-top: 16px; border-top: 1px solid rgba(255,215,0,0.2);">
+                        <h4 style="color: #ffd700; margin-bottom: 12px;">管理员发布公告</h4>
+                        <div class="form-group">
+                            <input type="text" id="announcementTitle" placeholder="公告标题">
+                        </div>
+                        <div class="form-group">
+                            <textarea id="announcementContent" rows="3" placeholder="公告内容（可选）"></textarea>
+                        </div>
+                        <div class="form-group">
+                            <div class="image-upload-area" id="announcementImageArea" onclick="document.getElementById('announcementImage').click()" style="padding: 12px; border: 2px dashed rgba(255,215,0,0.3); border-radius: 8px; text-align: center; cursor: pointer; color: #aaa;">
+                                <div id="announcementUploadPlaceholder">📷 点击上传公告图片（可选）</div>
+                                <img id="announcementImagePreview" style="display: none; max-width: 100%; max-height: 200px; border-radius: 8px; margin-top: 8px;">
+                            </div>
+                            <input type="file" id="announcementImage" accept="image/*" style="display: none;" onchange="handleAnnouncementImageUpload(event)">
+                        </div>
+                        <button id="btnPublishAnnouncement" class="btn btn-primary" onclick="publishAnnouncement()">发布公告</button>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">💬 留言板</div>
+                    <div style="margin-bottom: 16px; display: flex; flex-wrap: wrap; gap: 8px;">
+                        <input type="text" id="messageInput" placeholder="说点什么..." style="flex: 1; padding: 12px; border: 2px solid rgba(255,215,0,0.3); border-radius: 8px; background: rgba(0,0,0,0.3); color: #fff; font-size: 16px; min-width: 150px;">
+                        <div class="image-upload-btn" onclick="document.getElementById('messageImage').click()" style="padding: 12px 16px; border: 2px solid rgba(255,215,0,0.3); border-radius: 8px; cursor: pointer; color: #aaa; background: rgba(0,0,0,0.3); display: flex; align-items: center; gap: 4px;">
+                            📷
+                            <span id="messageImageName" style="font-size: 12px; max-width: 60px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"></span>
+                        </div>
+                        <input type="file" id="messageImage" accept="image/*" style="display: none;" onchange="handleMessageImageUpload(event)">
+                        <button id="btnSendMessage" class="btn btn-primary" onclick="sendMessage()">发送</button>
+                    </div>
+                    <div id="messageList">
+                        <p style="color: #aaa; text-align: center; padding: 20px;">暂无留言</p>
+                    </div>
+                </div>
+
+                </div>
+        </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+    </div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/home.js?v=4"></script>
+    <script>initAppPage(() => { try { loadAnnouncements(); loadMessages() } catch (error) { console.error('Failed to load board data:', error) } })</script>
+</body>
+</html>

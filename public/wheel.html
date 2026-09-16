@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>幸运转盘 - 11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <style>
+        /* 转盘页：浮层静态内联展示（覆盖 fixed 全屏样式） */
+        .wheel-overlay {
+            position: relative;
+            inset: auto;
+            z-index: auto;
+            display: block;
+            overflow-y: visible;
+            padding: 0;
+            background: none;
+        }
+        .wheel-overlay::before { display: none; }
+        .container { max-width: 620px; margin: 0 auto; padding: 20px 16px; }
+    </style>
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn active" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="wheelEmptyTip" style="color: #aaa; text-align: center; display: none;">转盘尚未配置，请联系管理员在转盘内进行配置</div>
+    <div class="wheel-overlay" id="wheelOverlay">
+        <button class="wheel-overlay-back" onclick="location.href='games.html'">← 返回</button>
+        <div class="wheel-overlay-inner">
+        <div class="wheel-overlay-title" id="wheelOverlayTitle">🎁 奖励转盘<button class="wheel-sound-btn" id="wheelSoundBtn" onclick="toggleWheelSound()">🔊</button></div>
+        <div class="wheel-mode-switch">
+            <button id="wheelModeRewardBtn" class="wheel-mode-btn" onclick="setWheelMode('reward')">🎁 奖励转盘</button>
+            <button id="wheelModePenaltyBtn" class="wheel-mode-btn" onclick="setWheelMode('penalty')">✖ 惩罚转盘</button>
+        </div>
+        <div class="wheel-wrap" id="wheelWrap">
+            <div class="wheel-lights" id="wheelLights"></div>
+            <div class="wheel-speed-blur" id="wheelSpeedBlur"></div>
+            <div class="wheel-pointer" id="wheelPointer"></div>
+            <div id="wheelDisc" class="wheel-disc">
+                <div id="wheelBg" class="wheel-bg"></div>
+                <div id="wheelLabels" class="wheel-labels"></div>
+            </div>
+            <div class="wheel-hub">🎡</div>
+        </div>
+        <button class="wheel-spin-btn" id="wheelSpinBtn">按住蓄力</button>
+        <div class="wheel-hint" id="wheelHint">👆 按住按钮蓄力，蓄力越久转得越快、转得越久，松手开始转动</div>
+        <div class="wheel-spins-left" id="wheelSpinsLeft" style="display: none;"></div>
+        <div class="wheel-side-panel">
+            <div class="wheel-panel-header" onclick="toggleWheelHistory()">
+                <span>🎰 转盘记录</span>
+                <span class="wheel-panel-toggle" id="wheelHistoryToggle"></span>
+            </div>
+            <div id="wheelHistoryList">
+                <p style="color: #aaa; text-align: center; padding: 12px;">暂无记录</p>
+            </div>
+        </div>
+        <div class="wheel-side-panel admin-only">
+            <div class="wheel-panel-header" onclick="toggleWheelAdmin()">
+                <span>⚙️ 转盘配置（管理员）</span>
+                <span class="wheel-panel-toggle" id="wheelAdminToggle">展开 ▼</span>
+            </div>
+            <div id="wheelAdminBody" style="display: none;">
+                <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+                    <button id="wheelAdminRewardTab" class="btn btn-success" onclick="setWheelAdminTab('reward')">奖励转盘</button>
+                    <button id="wheelAdminPenaltyTab" class="btn btn-danger" onclick="setWheelAdminTab('penalty')">惩罚转盘</button>
+                    <button id="wheelAdminQtyTab" class="btn btn-primary" onclick="setWheelAdminTab('penaltyQuantity')">数量小转盘</button>
+                </div>
+                <p style="color: #aaa; font-size: 12px; margin-bottom: 10px;">
+                    项目可选“管理后台”中定义的奖励/惩罚或筹码，奖励转盘也可混入惩罚项目；“权重”决定该项目的中奖概率和在转盘上所占的面积（格数）。转到惩罚项目后，会弹出“数量小转盘”转出惩罚数量（在“数量小转盘”页签配置各档数量与权重）。
+                </p>
+                <div id="wheelAdminItems"></div>
+                <div style="display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; align-items: center;">
+                    <button class="btn btn-primary" id="btnAddWheelItem" onclick="addWheelItem()">＋ 添加项目</button>
+                    <button id="btnSaveWheelConfig" class="btn btn-success" onclick="saveWheelConfig()">保存配置</button>
+                </div>
+                <div style="display: flex; gap: 10px; margin-top: 14px; align-items: center; border-top: 1px solid rgba(255,215,0,0.15); padding-top: 12px;">
+                    <label style="color: #aaa; font-size: 13px; white-space: nowrap;">每用户可转次数</label>
+                    <input type="number" min="0" id="wheelAdminSpinLimit" style="width: 90px;">
+                    <span style="color: #aaa; font-size: 12px;">0 = 不限（每个转盘单独计算；可在用户管理中对单个用户单独设置）</span>
+                </div>
+            </div>
+        </div>
+        </div>
+        <div class="wheel-flash" id="wheelFlash"></div>
+        <div class="wheel-result-popup" id="wheelResultPopup" onclick="dismissWheelResult()">
+            <img class="popup-image" id="wheelPopupImage" style="display: none;">
+            <span class="popup-icon" id="wheelPopupIcon">🎉</span>
+            <div class="popup-text" id="wheelPopupText"></div>
+            <div class="popup-tip">点击任意位置继续</div>
+        </div>
+        <div class="qty-wheel-modal" id="qtyWheelModal">
+            <div class="qty-wheel-box">
+                <div class="qty-wheel-title">🎰 转出惩罚数量…</div>
+                <div class="qty-wheel-wrap" id="qtyWheelWrap">
+                    <div class="qty-wheel-pointer">▼</div>
+                    <div class="qty-wheel-disc" id="qtyWheelDisc">
+                        <div class="qty-wheel-bg" id="qtyWheelBg"></div>
+                        <div class="qty-wheel-labels" id="qtyWheelLabels"></div>
+                    </div>
+                    <div class="qty-wheel-hub">数量</div>
+                </div>
+            </div>
+        </div>
+    </div>
+        </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+    </div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/wheel.js?v=4"></script>
+    <script>initAppPage(() => { initWheelPage(); loadAdminTypesForWheel(); openWheelOverlay() })</script>
+</body>
+</html>

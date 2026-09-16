@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn active" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div id="shop" class="page active">
+                <div class="card">
+                    <div class="card-title">🎁 奖励兑换</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">使用筹码兑换奖励</p>
+                    <div id="shopRewardsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">✖ 消除惩罚</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">使用筹码消除惩罚</p>
+                    <div id="shopPenaltiesList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🛒 商品购买</div>
+                    <p style="color: #aaa; margin-bottom: 16px;">使用筹码购买商品</p>
+                    <div id="shopProductsList" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 16px;"></div>
+                </div>
+            </div>
+        </div>
+
+    <div class="auto-save-indicator" id="autoSaveIndicator">
+        💾 自动保存中...
+    </div>
+    </div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/shop.js?v=4"></script>
+    <script>initAppPage(loadShop)</script>
+</body>
+</html>
