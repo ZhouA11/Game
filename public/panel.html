@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人面板 - 11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/grab.css?v=1">
+    <link rel="stylesheet" href="css/panel.css?v=1">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="mall.html">鎏金商城</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn active" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="casino-banner">
+                <h1>✦ 个人面板 · MY VAULT ✦</h1>
+                <div class="sub">资产 / 奖励+碎片 / 道具 / 惩罚</div>
+            </div>
+
+            <div class="panel-tabs">
+                <button class="panel-tab active" data-tab="assets">💰 资产</button>
+                <button class="panel-tab" data-tab="reward">🎟️ 奖励与碎片</button>
+                <button class="panel-tab" data-tab="items">🎒 道具</button>
+                <button class="panel-tab" data-tab="penalty">😵 惩罚</button>
+            </div>
+
+            <!-- 区一：资产总览 -->
+            <div id="tab-assets" class="tab-page">
+                <div class="overview-grid">
+                    <div class="overview-card"><div class="o-num" id="ovCoin">-</div><div class="o-label">🪙 金币</div></div>
+                    <div class="overview-card"><div class="o-num" id="ovAct">-</div><div class="o-label">⚡ 活跃值</div></div>
+                    <div class="overview-card"><div class="o-num" id="ovItems">-</div><div class="o-label">🎒 持有道具体数</div></div>
+                    <div class="overview-card"><div class="o-num" id="ovFrag">-</div><div class="o-label">🧩 碎片总数</div></div>
+                </div>
+                <div class="panel-card" style="margin-top:16px">
+                    <div class="stat-line"><span>🔗 统一流水（最近20条）</span><a class="mini-btn" href="assets.html">完整资产页</a></div>
+                    <div id="ledgerList"></div>
+                </div>
+            </div>
+
+            <!-- 区二：奖励与碎片 -->
+            <div id="tab-reward" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">🎟️ 奖励背包（现实奖励 · 手动核销）</div>
+                    <div id="bagList"></div>
+                </div>
+                <div class="panel-card">
+                    <div class="panel-title">🧩 碎片合成（L3目标5片 · L4目标7片）</div>
+                    <div id="fragList"></div>
+                </div>
+            </div>
+
+            <!-- 区三：道具 -->
+            <div id="tab-items" class="tab-page" style="display:none">
+                <div class="panel-card">
+                    <div class="panel-title">🎮 游戏类道具（含收藏外观）</div>
+                    <div id="gameItems"></div>
+                </div>
+                <div class="panel-card">
+                    <div class="panel-title">🛡️ 惩罚减免类（手动使用 · 目标自选）</div>
+                    <div id="clearItems"></div>
+                </div>
+            </div>
+
+            <!-- 区四：惩罚 -->
+            <div id="tab-penalty" class="tab-page" style="display:none">
+                <div class="notice-bar">😵 惩罚仅做累计展示，不会自动结算 · 使用减免券主动消解，或联系管理员调整</div>
+                <div class="panel-card">
+                    <div class="panel-title">😈 Spank 累计（按惩罚道具分组）</div>
+                    <div id="penList"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 目标选择弹窗 -->
+    <div id="targetMask" class="result-mask">
+        <div class="result-box">
+            <div class="result-emoji">🛡️</div>
+            <div class="result-title" id="targetTitle">选择减免目标</div>
+            <div class="result-detail" style="text-align:left" id="targetList"></div>
+            <button class="result-btn" id="targetClose">取消</button>
+        </div>
+    </div>
+
+    <div id="grabToast" class="grab-toast"></div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/panel.js?v=1"></script>
+    <script>initAppPage(loadPanel)</script>
+</body>
+</html>

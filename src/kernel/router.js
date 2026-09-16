@@ -46,6 +46,23 @@ async function handlePlayerKernel(request, DB, path) {
   const auth = await requireAuth(request, DB)
   const username = auth.username
 
+  // 资产总览（个人面板四区之首）
+  if (path[0] === 'me' && path[1] === 'overview' && method === 'GET') {
+    const u = await DB.prepare('SELECT balance, activity FROM users WHERE username = ?').bind(username).first()
+    const frag = await DB.prepare(
+      'SELECT COALESCE(SUM(count), 0) AS c FROM player_fragments WHERE username = ?'
+    ).bind(username).first()
+    const items = await DB.prepare(
+      'SELECT COALESCE(SUM(count), 0) AS c FROM player_items WHERE username = ?'
+    ).bind(username).first()
+    return okResponse({
+      balance: u ? u.balance : 0,
+      activity: u ? u.activity : 0,
+      fragmentCount: frag?.c || 0,
+      itemCount: items?.c || 0,
+    })
+  }
+
   // 道具库存 + 自动挂载开关
   if (path[0] === 'me' && path[1] === 'inventory' && method === 'GET') {
     const rows = await DB.prepare(

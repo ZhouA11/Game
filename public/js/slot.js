@@ -159,6 +159,10 @@ async function doSpin() {
     holdReel = null
     document.querySelectorAll('.hold-btn').forEach(x => x.classList.remove('on'))
     await replaySteps(r)
+    // T5.6：自动挂载道具生效轻提示
+    for (const e of (r.effects || [])) {
+      toast(`✨ ${e.name}已生效${e.action === 'insurance' ? '（连败保护）' : ''}`)
+    }
     lastResult = r
     lastSpinId = r.spinId
     updateBalance(r.balance)

@@ -2,13 +2,16 @@
 // 路径：/api/grab/*（抓娃娃），path 为解码后的路径段数组（不含 /api）
 
 import { KernelError, okResponse, errorResponse, readJson, extractIdempotencyKey, toInt } from '../kernel/util.js'
-import { requireAuth } from '../kernel/auth.js'
+import { requireAuth, requireAdmin } from '../kernel/auth.js'
 import {
   ensureGrabSchemaOnce, getMachineState, clawOp, rerollOp, revealOp, getGrabConfig,
 } from './grab.js'
 import {
   ensureSlotSchemaOnce, getSlotState, spinOp, nudgeOp, monkeyOp, wheelOp,
 } from './slot.js'
+import {
+  ensureShopSchemaOnce, listShopProducts, buyProductOp, createProductOp, updateProductOp,
+} from './shop.js'
 
 function requireIdempotencyKey(request, body) {
   const key = extractIdempotencyKey(request, body)
@@ -87,7 +90,53 @@ export async function handleGamesRequest(request, DB, path) {
       throw error
     }
   }
+  if (path[0] === 'mall') {
+    await ensureShopSchemaOnce(DB)
+    try {
+      return await handleMall(request, DB, path.slice(1))
+    } catch (error) {
+      if (error instanceof KernelError) return errorResponse(error)
+      throw error
+    }
+  }
   return null
+}
+
+// ---------------- 商店（步骤5：只卖道具） ----------------
+async function handleMall(request, DB, path) {
+  const method = request.method
+
+  // 管理端（上架/改价；步骤6接UI）
+  if (path[0] === 'admin' && path[1] === 'products') {
+    const admin = await requireAdmin(request, DB)
+    if (method === 'POST') {
+      const body = await readJson(request)
+      return okResponse(await createProductOp(DB, body, admin.username))
+    }
+    if (path[2] && method === 'PUT') {
+      const body = await readJson(request)
+      return okResponse(await updateProductOp(DB, toInt(path[2], 0, 1, 1e12), body, admin.username))
+    }
+  }
+
+  const auth = await requireAuth(request, DB)
+
+  // 商品列表（玩家端）
+  if (path[0] === 'products' && method === 'GET') {
+    return okResponse({ products: await listShopProducts(DB) })
+  }
+  // 购买（幂等）
+  if (path[0] === 'buy' && method === 'POST') {
+    const body = await readJson(request)
+    const key = requireIdempotencyKey(request, body)
+    return okResponse(await buyProductOp(DB, {
+      username: auth.username,
+      productId: toInt(body.product_id, 0, 1, 1e12),
+      idempotencyKey: key,
+    }))
+  }
+
+  throw new KernelError('NOT_FOUND', '接口不存在', 404)
 }
 
 // ---------------- 老虎机（步骤3） ----------------

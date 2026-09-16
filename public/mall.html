@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鎏金商城 - 11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/grab.css?v=1">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="panel.html">个人面板</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn active" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="casino-banner">
+                <h1>✦ 鎏金商城 · GOLDEN MALL ✦</h1>
+                <div class="sub">只卖道具 · 现实奖励仅可通过游戏获得，不在商城出售</div>
+            </div>
+
+            <div class="panel-card" style="display:flex; gap:20px; justify-content:center; flex-wrap:wrap">
+                <span class="user-badge">🪙 金币：<b id="coinBalance">-</b></span>
+                <span class="user-badge">⚡ 活跃值：<b id="actBalance">-</b></span>
+                <a class="nav-btn" href="panel.html" style="text-decoration:none">📦 前往个人面板</a>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-title">🎮 游戏类道具 <small style="font-size:12px;color:rgba(255,236,176,.6)">自动挂载类道具触发时自动生效；作用型道具在游戏中手动使用</small></div>
+                <div id="gameProducts" class="product-grid"></div>
+            </div>
+
+            <div class="panel-card">
+                <div class="panel-title">🛡️ 惩罚减免类 <small style="font-size:12px;color:rgba(255,236,176,.6)">手动使用：在个人面板选择要减免的惩罚道具；减免量固定，超出部分作废</small></div>
+                <div id="clearProducts" class="product-grid"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 详情弹窗 -->
+    <div id="detailMask" class="result-mask">
+        <div class="result-box">
+            <div class="result-rays"></div>
+            <div id="detailEmoji" class="result-emoji">🎁</div>
+            <div id="detailName" class="result-title"></div>
+            <div id="detailBody" class="result-detail" style="text-align:left"></div>
+            <button class="result-btn" id="buyBtn">购买</button>
+            <button class="result-btn" id="detailClose" style="background:none; box-shadow:none; border:1px solid rgba(255,215,0,.5); color:#ffd700">关闭</button>
+        </div>
+    </div>
+
+    <div id="grabToast" class="grab-toast"></div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/mall.js?v=1"></script>
+    <script>initAppPage(loadMall)</script>
+</body>
+</html>

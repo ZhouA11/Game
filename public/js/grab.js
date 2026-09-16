@@ -168,6 +168,10 @@ async function doClaw() {
     arm.style.top = '-12%'
     await sleep(400)
     arm.classList.remove('grabbing')
+    // T5.6：自动挂载道具生效轻提示
+    for (const e of (r.effects || [])) {
+      toast(`✨ ${e.name}已生效`)
+    }
     showResult(r)
     selectedDollId = null
     await refresh()
