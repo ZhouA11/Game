@@ -6,6 +6,9 @@ import { requireAuth } from '../kernel/auth.js'
 import {
   ensureGrabSchemaOnce, getMachineState, clawOp, rerollOp, revealOp, getGrabConfig,
 } from './grab.js'
+import {
+  ensureSlotSchemaOnce, getSlotState, spinOp, nudgeOp, monkeyOp, wheelOp,
+} from './slot.js'
 
 function requireIdempotencyKey(request, body) {
   const key = extractIdempotencyKey(request, body)
@@ -75,5 +78,78 @@ export async function handleGamesRequest(request, DB, path) {
       throw error
     }
   }
+  if (path[0] === 'slot') {
+    await ensureSlotSchemaOnce(DB)
+    try {
+      return await handleSlot(request, DB, path.slice(1))
+    } catch (error) {
+      if (error instanceof KernelError) return errorResponse(error)
+      throw error
+    }
+  }
   return null
+}
+
+// ---------------- 老虎机（步骤3） ----------------
+async function handleSlot(request, DB, path) {
+  const method = request.method
+  const auth = await requireAuth(request, DB)
+
+  // 状态 + 公示（G4/G17）+ 最近一spin（断线恢复）
+  if (path[0] === 'state' && method === 'GET') {
+    return okResponse(await getSlotState(DB, auth.username))
+  }
+  if (path[0] === 'last' && method === 'GET') {
+    const st = await getSlotState(DB, auth.username)
+    return okResponse({ lastSpin: st.lastSpin, pendingInteractions: st.pendingInteractions })
+  }
+
+  // 转动（T3.11 全模拟）
+  if (path[0] === 'spin' && method === 'POST') {
+    const body = await readJson(request)
+    const key = requireIdempotencyKey(request, body)
+    return okResponse(await spinOp(DB, {
+      username: auth.username,
+      holdReel: body.hold_reel !== undefined && body.hold_reel !== null ? toInt(body.hold_reel, -1, 0, 4) : null,
+      idempotencyKey: key,
+    }))
+  }
+
+  // T3.8 Nudge 摇一格
+  if (path[0] === 'nudge' && method === 'POST') {
+    const body = await readJson(request)
+    const key = requireIdempotencyKey(request, body)
+    return okResponse(await nudgeOp(DB, {
+      username: auth.username,
+      spinId: toInt(body.spin_id, 0, 1, 1e12),
+      reel: toInt(body.reel, -1, 0, 4),
+      dir: body.dir,
+      idempotencyKey: key,
+    }))
+  }
+
+  // T3.4 追猴翻牌揭示
+  if (path[0] === 'monkey' && method === 'POST') {
+    const body = await readJson(request)
+    const key = requireIdempotencyKey(request, body)
+    return okResponse(await monkeyOp(DB, {
+      username: auth.username,
+      pendingId: toInt(body.pending_id, 0, 1, 1e12),
+      choice: body.choice,
+      idempotencyKey: key,
+    }))
+  }
+
+  // T3.6 幸运转轮揭示
+  if (path[0] === 'wheel' && method === 'POST') {
+    const body = await readJson(request)
+    const key = requireIdempotencyKey(request, body)
+    return okResponse(await wheelOp(DB, {
+      username: auth.username,
+      pendingId: toInt(body.pending_id, 0, 1, 1e12),
+      idempotencyKey: key,
+    }))
+  }
+
+  throw new KernelError('NOT_FOUND', '接口不存在', 404)
 }

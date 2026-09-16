@@ -1,0 +1,316 @@
+/* ============================================================
+   鎏金老虎机 · SLOT ROYALE（步骤3前端专属样式）
+   通用娱乐城基础样式（横幅/面板/弹窗）复用 grab.css
+   ============================================================ */
+
+/* ---------- 机柜 ---------- */
+.slot-machine {
+  position: relative;
+  border-radius: 22px;
+  padding: 18px;
+  background:
+    linear-gradient(180deg, rgba(77, 238, 234, 0.08) 0%, rgba(26, 11, 46, 0.55) 30%, rgba(13, 27, 51, 0.6) 100%),
+    rgba(0, 0, 0, 0.3);
+  border: 2px solid rgba(255, 215, 0, 0.6);
+  box-shadow:
+    0 0 40px rgba(255, 215, 0, 0.12),
+    0 25px 60px rgba(0, 0, 0, 0.55),
+    inset 0 0 60px rgba(77, 238, 234, 0.04);
+}
+
+.slot-stage-wrap {
+  border-radius: 16px;
+  overflow: hidden;
+  border: 2px solid rgba(255, 215, 0, 0.4);
+  background:
+    radial-gradient(ellipse at 50% 0%, rgba(77, 238, 234, 0.10) 0%, transparent 45%),
+    linear-gradient(180deg, #101b34 0%, #0b1226 60%, #070d1c 100%);
+  box-shadow: inset 0 0 50px rgba(0, 0, 0, 0.7);
+}
+
+.slot-stage {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 6px;
+  padding: 16px;
+  aspect-ratio: 5 / 3.2;
+}
+
+.slot-cell {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(22px, 4.5vw, 42px);
+  border-radius: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.07), rgba(0, 0, 0, 0.35));
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  box-shadow: inset 0 4px 10px rgba(0, 0, 0, 0.5);
+  transition: transform 0.15s, box-shadow 0.15s, opacity 0.15s;
+  user-select: none;
+}
+
+.slot-cell.jackpot-cell {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.35), rgba(184, 134, 11, 0.25));
+  border-color: rgba(255, 215, 0, 0.8);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.6);
+}
+
+/* 中奖线高亮 */
+.slot-cell.win {
+  background: linear-gradient(180deg, rgba(255, 215, 0, 0.4), rgba(199, 44, 65, 0.3));
+  border-color: var(--gold-bright);
+  box-shadow: 0 0 18px rgba(255, 215, 0, 0.8);
+  transform: scale(1.08);
+  animation: winBlink 0.5s ease-in-out 2;
+}
+
+@keyframes winBlink {
+  50% { filter: brightness(1.6); }
+}
+
+/* 爆裂 */
+.slot-cell.pop { animation: popOut 0.4s ease-in forwards; }
+
+@keyframes popOut {
+  40% { transform: scale(1.25); filter: brightness(2.2); opacity: 1; }
+  100% { transform: scale(0); opacity: 0; }
+}
+
+/* 下落补位 */
+.slot-cell.drop-in { animation: dropIn 0.3s ease-out; }
+
+@keyframes dropIn {
+  from { transform: translateY(-120%); opacity: 0.2; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+/* 滚动中 */
+.slot-cell.spinning { animation: spinBlur 0.12s linear infinite; }
+
+@keyframes spinBlur {
+  0% { transform: translateY(-18%); filter: blur(1px); }
+  50% { transform: translateY(18%); filter: blur(1px); }
+  100% { transform: translateY(-18%); filter: blur(1px); }
+}
+
+/* ---------- Fever ---------- */
+.fever-bar {
+  display: flex;
+  gap: 4px;
+  margin: 10px 0 6px;
+}
+
+.fever-bar i {
+  flex: 1;
+  height: 14px;
+  border-radius: 4px;
+  background: rgba(0, 0, 0, 0.45);
+  border: 1px solid rgba(77, 238, 234, 0.3);
+}
+
+.fever-bar i.on {
+  background: linear-gradient(180deg, #9df3f0, #4deeea 60%, #1e9e9b);
+  box-shadow: 0 0 10px rgba(77, 238, 234, 0.7);
+}
+
+.slot-machine.fever-on {
+  border-color: var(--neon-cyan);
+  animation: feverGlow 1.2s ease-in-out infinite;
+}
+
+@keyframes feverGlow {
+  0%, 100% { box-shadow: 0 0 30px rgba(77, 238, 234, 0.3), 0 25px 60px rgba(0, 0, 0, 0.55); }
+  50% { box-shadow: 0 0 60px rgba(77, 238, 234, 0.65), 0 25px 60px rgba(0, 0, 0, 0.55); }
+}
+
+.fever-banner {
+  display: none;
+  text-align: center;
+  padding: 8px;
+  margin-bottom: 12px;
+  border-radius: 12px;
+  background: linear-gradient(90deg, rgba(77, 238, 234, 0.2), rgba(255, 215, 0, 0.2), rgba(77, 238, 234, 0.2));
+  border: 1px solid var(--neon-cyan);
+  color: var(--neon-cyan);
+  font-weight: bold;
+  letter-spacing: 3px;
+  text-shadow: 0 0 12px rgba(77, 238, 234, 0.8);
+}
+
+.fever-banner.show { display: block; animation: fadeIn 0.3s; }
+
+/* ---------- 控制区 ---------- */
+.slot-actions {
+  margin-top: 16px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.btn-spin {
+  flex: 1;
+  min-width: 200px;
+  padding: 16px 26px;
+  border-radius: 14px;
+  border: none;
+  cursor: pointer;
+  font-size: 20px;
+  font-weight: bold;
+  letter-spacing: 3px;
+  background: linear-gradient(180deg, #fff3b0 0%, #ffd700 45%, #c9970b 100%);
+  color: #3a2703;
+  box-shadow: 0 0 24px rgba(255, 215, 0, 0.5), 0 7px 0 #8a6508, 0 14px 24px rgba(0, 0, 0, 0.45);
+  transition: all 0.15s;
+}
+
+.btn-spin:hover:not(:disabled) { transform: translateY(-2px); }
+.btn-spin:disabled { filter: grayscale(0.8) brightness(0.55); cursor: not-allowed; box-shadow: none; }
+
+.hold-row {
+  display: none;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.hold-row.show { display: flex; }
+
+.hold-row .hold-label { color: var(--gold-bright); font-size: 14px; }
+
+.hold-btn {
+  padding: 8px 16px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 215, 0, 0.5);
+  background: rgba(255, 215, 0, 0.1);
+  color: var(--gold);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.hold-btn.on {
+  background: var(--gold);
+  color: #3a2703;
+  box-shadow: 0 0 14px rgba(255, 215, 0, 0.6);
+}
+
+.nudge-row {
+  display: none;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.nudge-row.show { display: flex; }
+
+.nudge-row .nudge-label { color: rgba(255, 236, 176, 0.9); font-size: 14px; }
+
+.nudge-btn {
+  padding: 8px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(77, 238, 234, 0.5);
+  background: rgba(77, 238, 234, 0.1);
+  color: var(--neon-cyan);
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.nudge-btn:hover { background: rgba(77, 238, 234, 0.25); }
+
+/* ---------- 追猴翻牌 ---------- */
+.monkey-cards {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  margin: 18px 0;
+}
+
+.monkey-card {
+  width: 96px;
+  height: 132px;
+  border-radius: 14px;
+  cursor: pointer;
+  perspective: 600px;
+  border: none;
+  background: none;
+  padding: 0;
+}
+
+.monkey-card .card-inner {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  transform-style: preserve-3d;
+  transition: transform 0.5s;
+}
+
+.monkey-card.flipped .card-inner { transform: rotateY(180deg); }
+
+.monkey-card .card-face, .monkey-card .card-back {
+  position: absolute;
+  inset: 0;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backface-visibility: hidden;
+  font-size: 30px;
+  font-weight: bold;
+}
+
+.monkey-card .card-back {
+  background: linear-gradient(150deg, #801336, #2d132c);
+  border: 2px solid var(--gold);
+  color: var(--gold);
+  box-shadow: 0 0 16px rgba(255, 215, 0, 0.3);
+}
+
+.monkey-card .card-face {
+  transform: rotateY(180deg);
+  background: linear-gradient(150deg, #fff3b0, #ffd700);
+  color: #5a4306;
+  border: 2px solid #8a6508;
+}
+
+.monkey-card .card-face.empty { background: linear-gradient(150deg, #555, #222); color: #999; }
+
+/* ---------- 幸运转轮 ---------- */
+.wheel-wrap {
+  position: relative;
+  width: 240px;
+  height: 240px;
+  margin: 16px auto;
+  border-radius: 50%;
+  border: 4px solid var(--gold);
+  box-shadow: 0 0 30px rgba(255, 215, 0, 0.4), inset 0 0 30px rgba(0, 0, 0, 0.6);
+  overflow: hidden;
+  background: conic-gradient(
+    #c72c41 0deg 51.4deg, #2d132c 51.4deg 102.9deg, #1e5f74 102.9deg 154.3deg,
+    #6b46c1 154.3deg 205.7deg, #801336 205.7deg 257.1deg, #1a5c3a 257.1deg 308.6deg, #444 308.6deg 360deg);
+}
+
+.wheel-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.85);
+  pointer-events: none;
+}
+
+.wheel-pointer {
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 30px;
+  z-index: 5;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.7));
+}
+
+.wheel-wrap.spinning { transition: transform 3.2s cubic-bezier(0.2, 0.8, 0.2, 1); }

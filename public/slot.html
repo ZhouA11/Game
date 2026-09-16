@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>鎏金老虎机 - 11的娱乐游戏网站</title>
+    <link rel="stylesheet" href="css/style.css?v=4">
+    <link rel="stylesheet" href="css/grab.css?v=1">
+    <link rel="stylesheet" href="css/slot.css?v=1">
+</head>
+<body>
+    <div id="mainSection">
+        <div class="header">
+            <div class="logo">11的娱乐游戏网站</div>
+            <div class="nav">
+                    <a class="nav-btn" href="home.html">主页面</a>
+                    <a class="nav-btn" href="assets.html">我的资产</a>
+                    <a class="nav-btn" href="shop.html">商店</a>
+                    <a class="nav-btn" href="bank.html">银行</a>
+                    <a class="nav-btn admin-only" href="admin.html">管理后台</a>
+                    <a class="nav-btn admin-only" href="users.html">用户管理</a>
+                    <a class="nav-btn" href="wheel.html">幸运转盘</a>
+                    <a class="nav-btn active" href="games.html">游戏界面</a>
+                </div>
+            <div class="user-info">
+                <span id="userBalance" class="user-badge">筹码: ¥0</span>
+                <span id="userBadge" class="user-badge">玩家</span>
+                <span id="currentUsername"></span>
+                <button class="btn btn-danger" onclick="handleLogout()">退出</button>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="casino-banner">
+                <h1>✦ 鎏金老虎机 · SLOT ROYALE ✦</h1>
+                <div class="sub">连环爆裂 · 倍率狂飙 · Fever 免费连转 · 追猴翻牌</div>
+            </div>
+
+            <div class="grab-layout">
+                <!-- 机器 -->
+                <div class="slot-machine" id="slotMachine">
+                    <div class="machine-top">
+                        <div class="machine-lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                        <div class="machine-title">SLOT ROYALE · 鎏金机</div>
+                        <div class="machine-lights"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+                    </div>
+                    <div class="fever-banner" id="feverBanner">🔥 FEVER 狂热模式 · 倍率不重置 · Wild×2 🔥</div>
+                    <div class="slot-stage-wrap">
+                        <div id="slotStage" class="slot-stage"></div>
+                    </div>
+                    <div class="slot-actions">
+                        <button id="spinBtn" class="btn-spin">🎰 转 动</button>
+                    </div>
+                    <div id="holdRow" class="hold-row">
+                        <span class="hold-label">🔒 Hold 保留轴（本轮生效）：</span>
+                        <button class="hold-btn" data-reel="0">轴1</button>
+                        <button class="hold-btn" data-reel="1">轴2</button>
+                        <button class="hold-btn" data-reel="2">轴3</button>
+                        <button class="hold-btn" data-reel="3">轴4</button>
+                        <button class="hold-btn" data-reel="4">轴5</button>
+                    </div>
+                    <div id="nudgeRow" class="nudge-row">
+                        <span class="nudge-label" id="nudgeLabel">Arrow Nudge（每日3次）：</span>
+                        <button class="nudge-btn" data-reel="0">轴1▲▼</button>
+                        <button class="nudge-btn" data-reel="1">轴2▲▼</button>
+                        <button class="nudge-btn" data-reel="2">轴3▲▼</button>
+                        <button class="nudge-btn" data-reel="3">轴4▲▼</button>
+                        <button class="nudge-btn" data-reel="4">轴5▲▼</button>
+                    </div>
+                </div>
+
+                <!-- 侧栏 -->
+                <div class="side-panel">
+                    <div class="panel-card">
+                        <div class="panel-title">🔥 Fever 狂热槽</div>
+                        <div class="fever-bar" id="feverBar"></div>
+                        <div class="luck-row">
+                            <span>每次转动+1 · 每次爆裂额外+1</span>
+                            <span><b id="feverText">0 / 12</b></span>
+                        </div>
+                        <div class="pity-hint" id="feverHint"></div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">📊 我的战况</div>
+                        <div class="stat-line"><span>今日免费转剩余</span><b id="freeLeft">5</b></div>
+                        <div class="stat-line"><span>今日 Nudge 剩余</span><b id="nudgeLeft">3</b></div>
+                        <div class="stat-line"><span>连续未中奖</span><b id="noWin">0</b></div>
+                        <div class="stat-line"><span>转动费用</span><b id="feeText">10 金币</b></div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">🎲 概率公示</div>
+                        <div class="stat-line" style="margin-bottom:8px"><span>🍒樱桃 🍋柠檬 🔔铃铛 💎钻石 🃏Wild</span></div>
+                        <div id="payTable">加载中...</div>
+                        <div class="panel-title" style="margin-top:14px">🎡 幸运转轮（Fortune 3连）</div>
+                        <div id="wheelTable">加载中...</div>
+                    </div>
+
+                    <div class="panel-card">
+                        <div class="panel-title">📜 玩法说明</div>
+                        <div class="stat-line" style="line-height:1.8; display:block">
+                            💥 中奖符号爆裂→上方下落补位→再判定，倍率 ×1→×2→×3→×5→×10<br>
+                            🐒 捣蛋猴3连：追猴小剧场（3选1翻牌，无惩罚）<br>
+                            🎰 Fortune 3连：幸运转轮<br>
+                            👑 Jackpot 5连（仅第2行）：触发彩池<br>
+                            🔥 四连环立即 Fever；结束时保底华丽碎片<br>
+                            🛟 连续15转未中，下一转必中
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 追猴小剧场 -->
+    <div id="monkeyMask" class="result-mask">
+        <div class="result-box">
+            <div class="result-rays"></div>
+            <div class="result-emoji">🐒</div>
+            <div class="result-title">捣蛋猴小剧场</div>
+            <div class="result-detail">挑一张牌，猴子把赃物还你（或空手而归）</div>
+            <div class="monkey-cards" id="monkeyCards"></div>
+            <button class="result-btn" id="monkeyCloseBtn" style="display:none">收下</button>
+        </div>
+    </div>
+
+    <!-- 幸运转轮 -->
+    <div id="wheelMask" class="result-mask">
+        <div class="result-box">
+            <div class="result-rays"></div>
+            <div class="result-emoji">🎡</div>
+            <div class="result-title">幸运转轮</div>
+            <div id="wheelStage">
+                <div class="wheel-pointer">▼</div>
+                <div id="wheelDisc" class="wheel-wrap"><div class="wheel-label" id="wheelLabel"></div></div>
+            </div>
+            <div id="wheelResult" class="result-detail"></div>
+            <button class="result-btn" id="wheelCloseBtn" style="display:none">收下</button>
+        </div>
+    </div>
+
+    <div id="grabToast" class="grab-toast"></div>
+
+    <script src="js/common.js?v=4"></script>
+    <script src="js/slot.js?v=1"></script>
+    <script>initAppPage(loadSlot)</script>
+</body>
+</html>
